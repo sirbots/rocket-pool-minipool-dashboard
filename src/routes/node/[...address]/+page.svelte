@@ -1,8 +1,9 @@
 <script>
-	import { getMinipoolAddresses } from '$lib/rocketPoolContractCalls';
-
 	// import data generated on the server
 	export let data;
+
+	// import helpers
+	import formatCoinValue from '../../../lib/formatCoinValue';
 
 	// destructure the server data for easier use
 	let { node, minipools, prices } = data;
@@ -13,33 +14,49 @@
 		month: 'long',
 		day: 'numeric'
 	}).format(registrationDate);
-
-	console.log(formattedRegistrationDate);
 </script>
 
 <h1>Rocket Pool Node: {node.address}</h1>
 
-<h2>Node Data</h2>
-<h3>Metadata</h3>
+<h2>Metadata</h2>
 <p>Timezone: {node.timezone}</p>
 <p>Registration Time: {formattedRegistrationDate}</p>
-<p>rplStake: {node.rplStake}</p>
-<p>effectiveRPLStake: {node.effectiveRPLStake}</p>
-<p>minimumRPLStake: {node.minimumRPLStake}</p>
-<p>maximumRPLStake: {node.maximumRPLStake}</p>
-<p>ethMatched: {node.ethMatched}</p>
-<p>ethMatchedLimit: {node.ethMatchedLimit}</p>
+<p>Smoothing Pool: Opted {node.smoothingPoolRegistrationState ? 'In' : 'Out'}</p>
 
-<p>distributorBalanceUserETH: {node.distributorBalanceUserETH}</p>
-<p>distributorBalanceNodeETH: {node.distributorBalanceNodeETH}</p>
-<p>smoothingPoolRegistrationState: {node.smoothingPoolRegistrationState}</p>
+<h2>Balances</h2>
+<h3>Node Wallet</h3>
+<p>
+	ETH Balance: {formatCoinValue(node.balanceETH, 4)} (${(
+		formatCoinValue(node.balanceETH, 6) * prices.eth
+	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+</p>
+<p>
+	RPL Balance: {formatCoinValue(node.balanceRPL, 4)} RPL (${(
+		formatCoinValue(node.balanceRPL, 6) * prices.rpl
+	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+</p>
 
-<p>ETH Balance: {node.balanceETH} ETH ({`$${node.balanceETH * prices.eth}`})</p>
-<p>RPL Balance: {node.balanceRPL} RPL ({`$${node.balanceRPL * prices.rpl}`})</p>
+<h3>Staked RPL</h3>
+<p>Minimum RPL Stake: {formatCoinValue(node.minimumRPLStake, 0)}</p>
+<p>Maximum RPL Stake: {formatCoinValue(node.maximumRPLStake, 0)}</p>
+<p>Current RPL Stake: {formatCoinValue(node.rplStake, 0)}</p>
+<p>
+	Effective RPL Stake: {formatCoinValue(node.effectiveRPLStake, 0)}
+	<span class="belowMinimumWarning">
+		{node.rplStake < node.minimumRPLStake ? '(below minimum)' : ''}
+	</span>
+</p>
 
-<h3>Bond/Insurance Stats</h3>
-<p>insert insurance data here</p>
+<h3>Total Value</h3>
+<p>
+	Total Value: ${(
+		formatCoinValue(node.balanceETH, 6) * prices.eth +
+		formatCoinValue(node.balanceRPL, 6) * prices.rpl +
+		formatCoinValue(node.rplStake, 6) * prices.rpl
+	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
+	<!-- console.log(formattedNumber); // Outputs: "13,518.24" -->
+</p>
 <h2>Minipools</h2>
 <p>Minipools Total: {node.minipoolsTotal}</p>
 <p>Minipools Active: {node.minipoolsActive}</p>
@@ -53,5 +70,8 @@
 <style>
 	h1 {
 		font-size: 1.5rem;
+	}
+	span.belowMinimumWarning {
+		color: #f06203;
 	}
 </style>

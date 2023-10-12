@@ -56,6 +56,9 @@ export async function load({ params }) {
 
 	// Get node details for a single node
 	const nodeDetails = await nodeManager.getNodeDetails(params.address);
+	const smoothingPoolRegistrationState = await nodeManager.getSmoothingPoolRegistrationState(
+		params.address
+	);
 
 	// Get minipool data for a single node
 	const minipoolCount = await getNodeMiniPoolCount(minipoolManager, params.address);
@@ -87,20 +90,19 @@ export async function load({ params }) {
 			// From the RocketNodeManager contract
 			timezone: nodeDetails.timezoneLocation,
 			registrationTime: nodeDetails.registrationTime,
-			// balanceWEI: nodeDetails.balanceETH,
-			balanceETH: Number(nodeDetails.balanceETH) / 10 ** 18,
-			balanceRPL: Number(nodeDetails.balanceRPL) / 10 ** 18,
+			balanceETH: nodeDetails.balanceETH,
+			balanceRPL: nodeDetails.balanceRPL,
 			rplStake: nodeDetails.rplStake,
 			effectiveRPLStake: nodeDetails.effectiveRPLStake,
 			minimumRPLStake: nodeDetails.minimumRPLStake,
 			maximumRPLStake: nodeDetails.maximumRPLStake,
-			ethMatched: nodeDetails.ethMatched,
-			ethMatchedLimit: nodeDetails.ethMatchedLimit,
 			minipoolCount: nodeDetails.minipoolCount,
+			smoothingPoolRegistrationState: smoothingPoolRegistrationState,
+			// ethMatched: nodeDetails.ethMatched,
+			// ethMatchedLimit: nodeDetails.ethMatchedLimit,
 			// balanceRETH: nodeDetails.balanceRETH,
-			distributorBalanceUserETH: nodeDetails.distributorBalanceUserETH,
-			distributorBalanceNodeETH: nodeDetails.distributorBalanceNodeETH,
-			smoothingPoolRegistrationState: nodeDetails.smoothingPoolRegistrationState,
+			// distributorBalanceUserETH: nodeDetails.distributorBalanceUserETH,
+			// distributorBalanceNodeETH: nodeDetails.distributorBalanceNodeETH,
 
 			// From the MinipoolManager contract
 			minipoolsTotal: minipoolCount,

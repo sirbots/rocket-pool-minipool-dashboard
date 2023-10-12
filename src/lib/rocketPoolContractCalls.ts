@@ -2,6 +2,7 @@ import { ethers } from 'ethers';
 
 interface RocketNodeManagerContract {
 	getNode(nodeAddress: string): Promise<string>;
+	getSmoothingPoolRegistrationState(nodeAddress: string): Promise<boolean>;
 }
 
 interface MinipoolManagerContract {
@@ -48,6 +49,20 @@ async function getNodeDetails(
 		const nodeDetails = await rocketNodeManagerContract.getNode(nodeAddress);
 
 		return nodeDetails;
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+async function getSmoothingPoolRegistrationState(
+	rocketNodeManagerContract: RocketNodeManagerContract,
+	nodeAddress: string
+) {
+	try {
+		const smoothingPoolRegistrationState =
+			await rocketNodeManagerContract.getSmoothingPoolRegistrationState(nodeAddress);
+
+		return smoothingPoolRegistrationState;
 	} catch (error) {
 		console.error(error);
 	}
@@ -156,6 +171,7 @@ async function getMinipoolAddresses(
 export {
 	createContract,
 	getNodeDetails,
+	getSmoothingPoolRegistrationState,
 	getMinipoolCountPerStatus,
 	getNodeMiniPoolCount,
 	getNodeActiveMiniPoolCount,
