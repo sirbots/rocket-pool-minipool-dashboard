@@ -2,7 +2,7 @@
 </script>
 
 <header>
-	<div class="logo">LOGO</div>
+	<div class="logo"><a href="/">LOGO</a></div>
 	<nav />
 </header>
 
@@ -42,9 +42,10 @@
 		justify-content: center;
 	}
 	nav,
-	.logo {
+	.logo a {
 		color: #000;
-		font-size: 40px;
+		font-size: 30px;
+		text-decoration: wavy underline;
 	}
 
 	.logo {
