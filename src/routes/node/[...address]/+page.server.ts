@@ -20,7 +20,6 @@ const ETHERSCAN_API_KEY = env.ETHERSCAN_API_KEY;
 // Load Rocket Pool contract ABIs
 import rocketMinipoolManagerAbi from '../../../lib/abi/rocketpool/contracts/contract/minipool/RocketMinipoolManager.json';
 import rocketNodeManagerAbi from '../../../lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
-import { get } from 'svelte/store';
 // import minipoolContractAbi from '../local-abis/SingleMinipoolContractAbi.json'; // TO DO: figure out where to put this file and then import it when you need it:
 
 const smartContractAddresses = {
@@ -55,7 +54,7 @@ export async function load({ params }) {
 	);
 
 	// Get node details for a single node
-	const nodeDetails = await nodeManager.getNodeDetails(params.address);
+	const nodeDetails = await getNodeDetails(nodeManager, params.address);
 	const smoothingPoolRegistrationState = await nodeManager.getSmoothingPoolRegistrationState(
 		params.address
 	);

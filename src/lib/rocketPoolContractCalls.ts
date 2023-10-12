@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 interface RocketNodeManagerContract {
-	getNode(nodeAddress: string): Promise<string>;
+	getNodeDetails(nodeAddress: string): Promise<string>;
 	getSmoothingPoolRegistrationState(nodeAddress: string): Promise<boolean>;
 }
 
@@ -46,7 +46,7 @@ async function getNodeDetails(
 	nodeAddress: string
 ) {
 	try {
-		const nodeDetails = await rocketNodeManagerContract.getNode(nodeAddress);
+		const nodeDetails = await rocketNodeManagerContract.getNodeDetails(nodeAddress);
 
 		return nodeDetails;
 	} catch (error) {
