@@ -11,7 +11,7 @@
 <AddressForm />
 
 <div class="recentNodes">
-	<h3>Recently Viewed Nodes</h3>
+	<h3>Your Recently Viewed Nodes</h3>
 	<p><a href="/node/{data.nodeAddress}">{data.nodeAddress}</a></p>
 </div>
 

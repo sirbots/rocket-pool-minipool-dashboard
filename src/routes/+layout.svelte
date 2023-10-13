@@ -1,8 +1,8 @@
-<script>
+<script lang="ts">
 </script>
 
 <header>
-	<div class="logo"><a href="/">LOGO</a></div>
+	<div class="logo"><a href="/">Home</a></div>
 	<nav />
 </header>
 
@@ -45,7 +45,7 @@
 	.logo a {
 		color: #000;
 		font-size: 30px;
-		text-decoration: wavy underline;
+		text-decoration: none;
 	}
 
 	.logo {

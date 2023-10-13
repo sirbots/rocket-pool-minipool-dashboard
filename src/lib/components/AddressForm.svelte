@@ -29,7 +29,8 @@
 			on:input={handleInput}
 			on:blur={handleBlur}
 		/>
-		<button type="submit" disabled={!addressValid}>View Node </button>
+
+		<button type="submit" disabled={!addressValid}>View Node</button>
 	</form>
 </div>
 <div class="errorBox">
@@ -53,6 +54,7 @@
 		height: 22px;
 		min-width: 400px;
 	}
+
 	button {
 		padding: 8px 10px;
 		width: 105px;
