@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import Jumper from '$lib/components/spinners/Jumper.svelte';
+
 	import formatCoinValue from '../../../lib/formatCoinValue';
 
 	export let data: PageData;
@@ -8,10 +10,12 @@
 	// destructure the server data for easier use
 	$: ({ serverData } = data);
 
-	$: ethPrice = 0;
+	$: ethPrice = 'loading';
 	$: rplPrice = 0;
 	$: nodeApiData = {};
 	$: minipoolApiData = {};
+
+	const spinnerSize = 45;
 
 	onMount(async () => {
 		// Get price data from the Coinmarketcap API
@@ -32,10 +36,17 @@
 
 <h1>Rocket Pool Node: {serverData.address}</h1>
 
-<p><b>eth price for testing: {ethPrice}</b></p>
 <h2>Metadata</h2>
 <p>Registered on {serverData.formattedRegistrationDate} in {serverData.timezone}.</p>
-<p>Smoothing Pool: Opted {nodeApiData.smoothingPoolRegistrationState ? 'In' : 'Out'}</p>
+
+{#if nodeApiData.smoothingPoolRegistrationState == true}
+	<p>Smoothing Pool: Opted In</p>
+{:else if nodeApiData.smoothingPoolRegistrationState == false}
+	<p>Smoothing Pool: Opted out</p>
+{:else}
+	<Jumper size={spinnerSize} />
+{/if}
+<!-- Opted {nodeApiData.smoothingPoolRegistrationState ? 'In' : 'Out'} -->
 
 <h2>Balances</h2>
 <h3>Node Wallet</h3>
