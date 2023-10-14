@@ -25,9 +25,9 @@ const minipoolManager = await createContract(
 	false
 );
 
-export async function GET(params) {
+export async function GET({ url, setHeaders }) {
 	try {
-		const nodeAddress = params.url.searchParams.get('nodeAddress');
+		const nodeAddress = url.searchParams.get('nodeAddress');
 
 		// Get minipool data for a single node
 		const minipoolCount = await getNodeMiniPoolCount(minipoolManager, nodeAddress);
@@ -45,6 +45,10 @@ export async function GET(params) {
 			nodeAddress,
 			minipoolCount
 		);
+
+		setHeaders({
+			'cache-control': 'max-age=300'
+		});
 
 		return json({
 			minipoolCount: minipoolCount,

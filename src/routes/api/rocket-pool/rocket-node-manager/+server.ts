@@ -21,14 +21,19 @@ const rocketNodeManagerContract = await createContract(
 	false
 );
 
-export async function GET(params) {
+export async function GET({ url, setHeaders }) {
 	try {
-		const nodeAddress = params.url.searchParams.get('nodeAddress');
+		const nodeAddress = url.searchParams.get('nodeAddress');
+
 		const nodeDetails = await getNodeDetails(rocketNodeManagerContract, nodeAddress);
 		const smoothingPoolRegistrationState = await getSmoothingPoolRegistrationState(
 			rocketNodeManagerContract,
 			nodeAddress
 		);
+
+		setHeaders({
+			'cache-control': 'max-age=60'
+		});
 
 		return json({
 			balanceETH: Number(nodeDetails.balanceETH),

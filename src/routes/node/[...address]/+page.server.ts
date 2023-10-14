@@ -40,9 +40,3 @@ export const load: PageServerLoad = async ({ params }) => {
 		}
 	};
 };
-
-// export const entries: EntryGenerator = () => {
-// 	return [{ address: '0x206d91c2467446FD1F5EDD07F61FA78Ac70b48B6' }];
-// };
-
-// export const prerender = true;
