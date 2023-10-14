@@ -2,12 +2,11 @@
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import formatCoinValue from '../../../lib/formatCoinValue';
-	import { getNodeDetails } from '$lib/rocketPoolContractCalls';
 
 	export let data: PageData;
 
 	// destructure the server data for easier use
-	$: ({ node } = data);
+	$: ({ serverData } = data);
 
 	$: ethPrice = 0;
 	$: rplPrice = 0;
@@ -15,19 +14,27 @@
 	$: minipoolApiData = {};
 
 	onMount(async () => {
+		// Get price data from the Coinmarketcap API
 		ethPrice = await fetch('../../api/prices/eth').then((res) => res.json());
 		rplPrice = await fetch('../../api/prices/rpl').then((res) => res.json());
+
+		// Get node data from the Ethers/Rocket Pool API
 		nodeApiData = await fetch(
-			'../../api/rocket-pool/rocket-node-manager?nodeAddress=0xC4c94ce609BFE032469A34F1b6f3aB3beC1E0b82'
+			`../../api/rocket-pool/rocket-node-manager?nodeAddress=${serverData.address}`
+		).then((res) => res.json());
+
+		// Get minipool data from the Ethers/Rocket Pool API
+		minipoolApiData = await fetch(
+			`../../api/rocket-pool/minipool-manager?nodeAddress=${serverData.address}`
 		).then((res) => res.json());
 	});
 </script>
 
-<h1>Rocket Pool Node: {node.address}</h1>
+<h1>Rocket Pool Node: {serverData.address}</h1>
 
 <p><b>eth price for testing: {ethPrice}</b></p>
 <h2>Metadata</h2>
-<p>Registered on {nodeApiData.formattedRegistrationDate} in {nodeApiData.timezone}.</p>
+<p>Registered on {serverData.formattedRegistrationDate} in {serverData.timezone}.</p>
 <p>Smoothing Pool: Opted {nodeApiData.smoothingPoolRegistrationState ? 'In' : 'Out'}</p>
 
 <h2>Balances</h2>
@@ -72,14 +79,13 @@
 	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 </p>
 
-<!-- 
 <h2>Minipools</h2>
-<p>Minipools Total: {nodeApiData.minipoolsTotal}</p>
-<p>Minipools Active: {nodeApiData.minipoolsActive}</p>
-<p>Minipools Validating: {nodeApiData.minipoolsValidating}</p>
-<p>Minipools Finalized: {nodeApiData.minipoolsFinalized}</p> -->
+<p>Minipools Total: {minipoolApiData.minipoolCount}</p>
+<p>Minipools Active: {minipoolApiData.activeMinipoolCount}</p>
+<p>Minipools Validating: {minipoolApiData.validatingMinipoolCount}</p>
+<p>Minipools Finalized: {minipoolApiData.finalisedMinipoolCount}</p>
 
-<!-- {#each nodeApiData.minipoolAddresses as pool}
+<!-- {#each minipoolApiData.minipoolAddresses as pool}
 	<p>{pool}</p>
 {/each} -->
 

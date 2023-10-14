@@ -4,90 +4,45 @@ import type { PageServerLoad } from './$types';
 import { ethers } from 'ethers';
 import { env } from '$env/dynamic/private';
 // Helper functions
-import {
-	createContract,
-	getNodeDetails,
-	getNodeMiniPoolCount,
-	getNodeActiveMiniPoolCount,
-	getNodeFinalisedMinipoolCount,
-	getNodeValidatingMinipoolCount,
-	getMinipoolAddresses
-} from '../../../lib/rocketPoolContractCalls';
+import { createContract, getNodeDetails } from '$lib/rocketPoolContractCalls';
 
 // Load Rocket Pool contract ABIs
-import rocketMinipoolManagerAbi from '../../../lib/abi/rocketpool/contracts/contract/minipool/RocketMinipoolManager.json';
-import rocketNodeManagerAbi from '../../../lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
-// import minipoolContractAbi from '../local-abis/SingleMinipoolContractAbi.json'; // TO DO: figure out where to put this file and then import it when you need it:
-
-const smartContractAddresses = {
-	rocketNodeManager: '0x89F478E6Cc24f052103628f36598D4C14Da3D287',
-	rocketMinipoolManager: '0x6293B8abC1F36aFB22406Be5f96D893072A8cF3a'
-};
+import rocketNodeManagerAbi from '$lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
 
 // Load the data for the client to consume
 /** @type {import('./$types').PageServerLoad} */
-export const load: PageServerLoad = async ({ params, depends }) => {
-	depends('page:server');
-
+export const load: PageServerLoad = async ({ params }) => {
 	// Initialize a connection to the Ethereum network
 	const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
 
-	// Create the RocketNodeManager contract object
-	const nodeManager = await createContract(
-		smartContractAddresses.rocketNodeManager,
+	const rocketNodeManagerContract = await createContract(
+		'0x89F478E6Cc24f052103628f36598D4C14Da3D287',
 		rocketNodeManagerAbi,
 		provider,
 		false
 	);
 
-	// Create the RocketMinipoolManager contract object
-	const minipoolManager = await createContract(
-		smartContractAddresses.rocketMinipoolManager,
-		rocketMinipoolManagerAbi,
-		provider,
-		false
-	);
+	const nodeDetails = await getNodeDetails(rocketNodeManagerContract, params.address);
 
-	// Get node details for a single node
-	const nodeDetails = await getNodeDetails(nodeManager, params.address);
-	const smoothingPoolRegistrationState = await nodeManager.getSmoothingPoolRegistrationState(
-		params.address
-	);
-
-	// Get minipool data for a single node
-	const minipoolCount = await getNodeMiniPoolCount(minipoolManager, params.address);
-	const activeMinipoolCount = await getNodeActiveMiniPoolCount(minipoolManager, params.address);
-	const finalisedMinipoolCount = await getNodeFinalisedMinipoolCount(
-		minipoolManager,
-		params.address
-	);
-	const validatingMinipoolCount = await getNodeValidatingMinipoolCount(
-		minipoolManager,
-		params.address
-	);
-	const minipoolAddresses = await getMinipoolAddresses(
-		minipoolManager,
-		params.address,
-		minipoolCount
-	);
-
-	const networkNodeCount = await nodeManager.getNodeCount();
-	console.log('networkNodeCount: ', networkNodeCount);
-	// const allNodes = await nodeManager.getNodeAddresses(3200, 25);
-	// console.table(allNodes);
+	const registrationDate = new Date(Number(nodeDetails.registrationTime) * 1000);
+	const formattedRegistrationDate = new Intl.DateTimeFormat('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric'
+	}).format(registrationDate);
 
 	return {
-		node: {
+		serverData: {
 			// From params
 			address: params.address,
-
-			// From the MinipoolManager contract
-			minipoolsTotal: minipoolCount,
-			minipoolsActive: activeMinipoolCount,
-			minipoolsFinalized: finalisedMinipoolCount,
-			minipoolsValidating: validatingMinipoolCount,
-			minipoolAddresses: minipoolAddresses
-		},
-		minipoools: {}
+			timezone: nodeDetails.timezoneLocation,
+			formattedRegistrationDate: formattedRegistrationDate
+		}
 	};
 };
+
+// export const entries: EntryGenerator = () => {
+// 	return [{ address: '0x206d91c2467446FD1F5EDD07F61FA78Ac70b48B6' }];
+// };
+
+// export const prerender = true;
