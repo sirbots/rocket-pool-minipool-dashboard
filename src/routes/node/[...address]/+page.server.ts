@@ -76,40 +76,10 @@ export const load: PageServerLoad = async ({ params, depends }) => {
 	// const allNodes = await nodeManager.getNodeAddresses(3200, 25);
 	// console.table(allNodes);
 
-	const registrationDate = new Date(Number(nodeDetails.registrationTime) * 1000);
-	const formattedRegistrationDate = new Intl.DateTimeFormat('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric'
-	}).format(registrationDate);
-
 	return {
-		// provider: provider,
-		// prices: {
-		// 	// From CoinMarketCap API
-		// 	eth: currentEthPrice,
-		// 	rpl: currentRplPrice
-		// },
 		node: {
 			// From params
 			address: params.address,
-
-			// From the RocketNodeManager contract
-			timezone: nodeDetails.timezoneLocation,
-			formattedRegistrationDate: formattedRegistrationDate,
-			balanceETH: nodeDetails.balanceETH,
-			balanceRPL: nodeDetails.balanceRPL,
-			rplStake: nodeDetails.rplStake,
-			effectiveRPLStake: nodeDetails.effectiveRPLStake,
-			minimumRPLStake: nodeDetails.minimumRPLStake,
-			maximumRPLStake: nodeDetails.maximumRPLStake,
-			minipoolCount: nodeDetails.minipoolCount,
-			smoothingPoolRegistrationState: smoothingPoolRegistrationState,
-			// ethMatched: nodeDetails.ethMatched,
-			// ethMatchedLimit: nodeDetails.ethMatchedLimit,
-			// balanceRETH: nodeDetails.balanceRETH,
-			// distributorBalanceUserETH: nodeDetails.distributorBalanceUserETH,
-			// distributorBalanceNodeETH: nodeDetails.distributorBalanceNodeETH,
 
 			// From the MinipoolManager contract
 			minipoolsTotal: minipoolCount,
