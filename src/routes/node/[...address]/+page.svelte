@@ -61,6 +61,11 @@
 		}
 		await aggregateMinipoolData(minipoolApiData.minipools);
 	});
+
+	// Helpers
+	function truncateAddress(address) {
+		return address.slice(0, 6) + '...' + address.slice(-4);
+	}
 </script>
 
 {#if serverData.message !== 'invalid-node-address'}
@@ -132,31 +137,49 @@
 	</p>
 
 	<h2>Minipools</h2>
-	<p>Minipools Total: {minipoolApiData.minipoolCount}</p>
-	<p>Minipools Active: {minipoolApiData.activeMinipoolCount}</p>
-	<p>Minipools Validating: {minipoolApiData.validatingMinipoolCount}</p>
-	<p>Minipools Finalized: {minipoolApiData.finalisedMinipoolCount}</p>
+	<p>Total: {minipoolApiData.minipoolCount}</p>
+	<p>Active: {minipoolApiData.activeMinipoolCount}</p>
+	<p>Validating: {minipoolApiData.validatingMinipoolCount}</p>
+	<p>Finalized: {minipoolApiData.finalisedMinipoolCount}</p>
 
 	<h3>Minipool Details</h3>
 
 	<h3>Summary</h3>
 
-	<p><b>All Nodes</b></p>
-	<p>Balance: {formatCoinValue(aggregateBalances.total, 6)} ETH (add $ amt)</p>
-	<p>Node Operator Share: {formatCoinValue(aggregateBalances.nodeShare, 6)} ETH (add $ amt)</p>
-	<p>User Share: {formatCoinValue(aggregateBalances.userShare, 6)} ETH (add $ amt)</p>
-	<p>Node Refund Balance: {formatCoinValue(aggregateBalances.refundBalance, 6)} ETH (add $ amt)</p>
-
 	{#if minipoolApiData !== 'loading'}
-		{#each minipoolApiData.minipools as pool}
-			<p><b>{pool.address}</b></p>
-			<p>Balance: {formatCoinValue(pool.balance, 6)} ETH (add $ amt)</p>
-			<p>Deposit Type: {formatCoinValue(pool.nodeDepositBalance, 0)}</p>
-			<p>Node Refund Balance: {formatCoinValue(pool.nodeRefundBalance, 6)} ETH (add $ amt)</p>
-			<p>Commission Rate: {formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</p>
-			<p>nodeShare: {formatCoinValue(pool.nodeShare, 6)} ETH (add $ amt)</p>
-			<p>userShare: {formatCoinValue(pool.userShare, 6)} ETH (add $ amt)</p>
-		{/each}
+		<table>
+			<tr>
+				<td><b>Minipool</b></td>
+				<td><b>Deposit Type</b></td>
+				<td><b>Commission</b></td>
+				<td><b>Balance</b></td>
+				<td><b>Operator Share</b></td>
+				<td><b>USD</b></td>
+			</tr>
+			<tr>
+				<td>Total</td>
+				<td>---</td>
+				<td>---</td>
+				<td>{formatCoinValue(aggregateBalances.total, 4)}</td>
+				<td>{formatCoinValue(aggregateBalances.nodeShare, 4)}</td>
+				<td>${(formatCoinValue(aggregateBalances.nodeShare, 6) * ethPrice).toFixed(2)}</td>
+			</tr>
+
+			{#each minipoolApiData.minipools as pool}
+				<tr>
+					<td
+						><a href={`https://etherscan.io/address/${pool.address}`}
+							>{truncateAddress(pool.address)}</a
+						></td
+					>
+					<td>{formatCoinValue(pool.nodeDepositBalance, 0)} ETH</td>
+					<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
+					<td>{formatCoinValue(pool.balance, 4)} ETH</td>
+					<td>{formatCoinValue(pool.nodeShare, 4)} ETH</td>
+					<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>
+				</tr>
+			{/each}
+		</table>
 	{/if}
 {:else}
 	<h1>Invalid node address</h1>
