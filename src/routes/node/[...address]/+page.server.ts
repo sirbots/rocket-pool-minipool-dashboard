@@ -24,6 +24,16 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		const nodeDetails = await getNodeDetails(rocketNodeManagerContract, params.address);
 
+		// Handle invalid node address
+		if (nodeDetails.message == 'invalid-node-address') {
+			return {
+				serverData: {
+					address: params.address,
+					message: nodeDetails.message
+				}
+			};
+		}
+
 		const registrationTime = nodeDetails.registrationTime;
 
 		const registrationDate = new Date(Number(registrationTime) * 1000);
@@ -42,6 +52,8 @@ export const load: PageServerLoad = async ({ params }) => {
 			}
 		};
 	} catch (error) {
+		console.log('*** ERROR MESSAGE ***');
 		console.error(error);
+		// console.error(message);
 	}
 };

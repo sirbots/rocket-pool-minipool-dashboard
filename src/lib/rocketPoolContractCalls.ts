@@ -50,7 +50,16 @@ async function getNodeDetails(
 
 		return nodeDetails;
 	} catch (error) {
+		console.log('*** ERROR MESSAGE FROM FUNCTION ***');
 		console.error(error);
+
+		if (error.shortMessage == 'bad address checksum') {
+			console.error(error.shortMessage);
+			return {
+				address: nodeAddress,
+				message: 'invalid-node-address'
+			};
+		}
 	}
 }
 

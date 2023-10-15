@@ -60,91 +60,117 @@
 			};
 		}
 		await aggregateMinipoolData(minipoolApiData.minipools);
-		console.log(`totalBalance: ${aggregateBalances}`);
 	});
 </script>
 
-<h1>Rocket Pool Node: {serverData.address}</h1>
+{#if serverData.message !== 'invalid-node-address'}
+	<h1>Rocket Pool Node: {serverData.address}</h1>
 
-<h2>Metadata</h2>
-<p>Registered on {serverData.formattedRegistrationDate} in {serverData.timezone}.</p>
+	<h2>Metadata</h2>
+	<p>Registered on {serverData.formattedRegistrationDate} in {serverData.timezone}.</p>
 
-{#if nodeApiData.smoothingPoolRegistrationState == true}
-	<p>Smoothing Pool: Opted In</p>
-{:else if nodeApiData.smoothingPoolRegistrationState == false}
-	<p>Smoothing Pool: Opted out</p>
+	{#if nodeApiData.smoothingPoolRegistrationState == true}
+		<p>Smoothing Pool: Opted In</p>
+	{:else if nodeApiData.smoothingPoolRegistrationState == false}
+		<p>Smoothing Pool: Opted out</p>
+	{:else}
+		<Jumper size={spinnerSize} />
+	{/if}
+
+	<h2>Balances</h2>
+	<h3>Node Wallet</h3>
+	<p>
+		ETH Balance: {formatCoinValue(nodeApiData.balanceETH, 4)} (${(
+			formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice
+		).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+	</p>
+	<p>
+		RPL Balance: {formatCoinValue(nodeApiData.balanceRPL, 4)} RPL (${(
+			formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice
+		).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+	</p>
+
+	<p>Unclaimed ETH: TBD</p>
+	<p>Unclaimed RPL: TBD</p>
+
+	<h3>Staked RPL</h3>
+	<p>
+		Minimum RPL Stake: {formatCoinValue(nodeApiData.minimumRPLStake, 0)} (${(
+			formatCoinValue(nodeApiData.minimumRPLStake, 2) * rplPrice
+		).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+	</p>
+	<p>
+		Maximum RPL Stake: {formatCoinValue(nodeApiData.maximumRPLStake, 0)} (${(
+			formatCoinValue(nodeApiData.maximumRPLStake, 2) * rplPrice
+		).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+	</p>
+	<p>
+		Current RPL Stake: {formatCoinValue(nodeApiData.rplStake, 0)} (${(
+			formatCoinValue(nodeApiData.rplStake, 2) * rplPrice
+		).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+		<span class="belowMinimumWarning">
+			{nodeApiData.rplStake < nodeApiData.minimumRPLStake ? '(below minimum)' : ''}
+		</span>
+	</p>
+	<p>
+		RPL Staking Rate: {((nodeApiData.rplStake / nodeApiData.minimumRPLStake) * 100).toFixed(1)}%
+	</p>
+	<p>
+		Required to meet minimum threshold:
+		{formatCoinValue(nodeApiData.minimumRPLStake - nodeApiData.rplStake, 2).toFixed(2)} RPL (${(
+			formatCoinValue(nodeApiData.minimumRPLStake - nodeApiData.rplStake, 2) * rplPrice
+		).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+	</p>
+
+	<h3>Total Value</h3>
+	<p>
+		Total Value: ${(
+			formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
+			formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
+			formatCoinValue(nodeApiData.rplStake, 6) * rplPrice
+		).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+	</p>
+
+	<h2>Minipools</h2>
+	<p>Minipools Total: {minipoolApiData.minipoolCount}</p>
+	<p>Minipools Active: {minipoolApiData.activeMinipoolCount}</p>
+	<p>Minipools Validating: {minipoolApiData.validatingMinipoolCount}</p>
+	<p>Minipools Finalized: {minipoolApiData.finalisedMinipoolCount}</p>
+
+	<h3>Minipool Details</h3>
+
+	<h3>Summary</h3>
+
+	<p><b>All Nodes</b></p>
+	<p>Balance: {formatCoinValue(aggregateBalances.total, 6)} ETH (add $ amt)</p>
+	<p>Node Operator Share: {formatCoinValue(aggregateBalances.nodeShare, 6)} ETH (add $ amt)</p>
+	<p>User Share: {formatCoinValue(aggregateBalances.userShare, 6)} ETH (add $ amt)</p>
+	<p>Node Refund Balance: {formatCoinValue(aggregateBalances.refundBalance, 6)} ETH (add $ amt)</p>
+
+	{#if minipoolApiData !== 'loading'}
+		{#each minipoolApiData.minipools as pool}
+			<p><b>{pool.address}</b></p>
+			<p>Balance: {formatCoinValue(pool.balance, 6)} ETH (add $ amt)</p>
+			<p>Deposit Type: {formatCoinValue(pool.nodeDepositBalance, 0)}</p>
+			<p>Node Refund Balance: {formatCoinValue(pool.nodeRefundBalance, 6)} ETH (add $ amt)</p>
+			<p>Commission Rate: {formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</p>
+			<p>nodeShare: {formatCoinValue(pool.nodeShare, 6)} ETH (add $ amt)</p>
+			<p>userShare: {formatCoinValue(pool.userShare, 6)} ETH (add $ amt)</p>
+		{/each}
+	{/if}
 {:else}
-	<Jumper size={spinnerSize} />
-{/if}
+	<h1>Invalid node address</h1>
 
-<h2>Balances</h2>
-<h3>Node Wallet</h3>
-<p>
-	ETH Balance: {formatCoinValue(nodeApiData.balanceETH, 4)} (${(
-		formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice
-	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-</p>
-<p>
-	RPL Balance: {formatCoinValue(nodeApiData.balanceRPL, 4)} RPL (${(
-		formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice
-	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-</p>
-
-<h3>Staked RPL</h3>
-<p>
-	Minimum RPL Stake: {formatCoinValue(nodeApiData.minimumRPLStake, 0)} (${(
-		formatCoinValue(nodeApiData.minimumRPLStake, 2) * rplPrice
-	).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-</p>
-<p>
-	Maximum RPL Stake: {formatCoinValue(nodeApiData.maximumRPLStake, 0)} (${(
-		formatCoinValue(nodeApiData.maximumRPLStake, 2) * rplPrice
-	).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-</p>
-<p>
-	Current RPL Stake: {formatCoinValue(nodeApiData.rplStake, 0)} (${(
-		formatCoinValue(nodeApiData.rplStake, 2) * rplPrice
-	).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
-	<span class="belowMinimumWarning">
-		{nodeApiData.rplStake < nodeApiData.minimumRPLStake ? '(below minimum)' : ''}
-	</span>
-</p>
-
-<h3>Total Value</h3>
-<p>
-	Total Value: ${(
-		formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
-		formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
-		formatCoinValue(nodeApiData.rplStake, 6) * rplPrice
-	).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-</p>
-
-<h2>Minipools</h2>
-<p>Minipools Total: {minipoolApiData.minipoolCount}</p>
-<p>Minipools Active: {minipoolApiData.activeMinipoolCount}</p>
-<p>Minipools Validating: {minipoolApiData.validatingMinipoolCount}</p>
-<p>Minipools Finalized: {minipoolApiData.finalisedMinipoolCount}</p>
-
-<h3>Minipool Details</h3>
-
-<h3>Summary</h3>
-
-<p><b>All Nodes</b></p>
-<p>Balance: {formatCoinValue(aggregateBalances.total, 6)} ETH (add $ amt)</p>
-<p>Node Operator Share: {formatCoinValue(aggregateBalances.nodeShare, 6)} ETH (add $ amt)</p>
-<p>User Share: {formatCoinValue(aggregateBalances.userShare, 6)} ETH (add $ amt)</p>
-<p>Node Refund Balance: {formatCoinValue(aggregateBalances.refundBalance, 6)} ETH (add $ amt)</p>
-
-{#if minipoolApiData !== 'loading'}
-	{#each minipoolApiData.minipools as pool}
-		<p><b>{pool.address}</b></p>
-		<p>Balance: {formatCoinValue(pool.balance, 6)} ETH (add $ amt)</p>
-		<p>Deposit Type: {formatCoinValue(pool.nodeDepositBalance, 0)} ETH (add $ amt)</p>
-		<p>Node Refund Balance: {formatCoinValue(pool.nodeRefundBalance, 6)} ETH (add $ amt)</p>
-		<p>Commission Rate: {formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</p>
-		<p>nodeShare: {formatCoinValue(pool.nodeShare, 6)} ETH (add $ amt)</p>
-		<p>userShare: {formatCoinValue(pool.userShare, 6)} ETH (add $ amt)</p>
-	{/each}
+	<p>
+		Are you sure you entered the address correctly? Ethers.js was not able to access node data at <b
+			>{serverData.address}.</b
+		>
+	</p>
+	<p>
+		Try <a href={`https://etherscan.io/address/${serverData.address}`}
+			>looking up the address on Etherscan</a
+		> to confirm that it's correct.
+	</p>
 {/if}
 
 <style>
