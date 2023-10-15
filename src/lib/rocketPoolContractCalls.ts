@@ -168,6 +168,24 @@ async function getMinipoolAddresses(
 	return validatingMinipools;
 }
 
+/*********************************
+ * Minipool Delegate Contract Calls
+ *********************************/
+
+// Get the node deposit balance
+async function getNodeDepositBalance(
+	minipoolDelegateContract: MinipoolDelegateContract
+	// nodeAddress: string
+) {
+	try {
+		const stakingMinipoolCount = await minipoolDelegateContract.getNodeDepositBalance();
+
+		return Number(stakingMinipoolCount);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
 export {
 	createContract,
 	getNodeDetails,
@@ -177,5 +195,6 @@ export {
 	getNodeActiveMiniPoolCount,
 	getNodeFinalisedMinipoolCount,
 	getNodeValidatingMinipoolCount,
-	getMinipoolAddresses
+	getMinipoolAddresses,
+	getNodeDepositBalance
 };

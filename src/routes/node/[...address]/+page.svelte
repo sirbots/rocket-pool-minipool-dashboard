@@ -13,7 +13,13 @@
 	$: ethPrice = 'loading';
 	$: rplPrice = 0;
 	$: nodeApiData = {};
-	$: minipoolApiData = {};
+	$: minipoolApiData = 'loading';
+	$: aggregateBalances = {
+		total: 0,
+		nodeShare: 0,
+		userShare: 0,
+		refundBalance: 0
+	};
 
 	const spinnerSize = 45;
 
@@ -31,6 +37,30 @@
 		minipoolApiData = await fetch(
 			`../../api/rocket-pool/minipool-manager?nodeAddress=${serverData.address}`
 		).then((res) => res.json());
+
+		// Helpers functions to aggregate the minipool data
+		async function aggregateMinipoolData(minipools) {
+			let total = 0;
+			let nodeShare = 0;
+			let userShare = 0;
+			let refundBalance = 0;
+
+			for (const pool of minipools) {
+				total += pool.balance;
+				nodeShare += pool.nodeShare;
+				userShare += pool.userShare;
+				refundBalance += pool.nodeRefundBalance;
+			}
+
+			aggregateBalances = {
+				total: total,
+				nodeShare: nodeShare,
+				userShare: userShare,
+				refundBalance: refundBalance
+			};
+		}
+		await aggregateMinipoolData(minipoolApiData.minipools);
+		console.log(`totalBalance: ${aggregateBalances}`);
 	});
 </script>
 
@@ -46,7 +76,6 @@
 {:else}
 	<Jumper size={spinnerSize} />
 {/if}
-<!-- Opted {nodeApiData.smoothingPoolRegistrationState ? 'In' : 'Out'} -->
 
 <h2>Balances</h2>
 <h3>Node Wallet</h3>
@@ -96,9 +125,27 @@
 <p>Minipools Validating: {minipoolApiData.validatingMinipoolCount}</p>
 <p>Minipools Finalized: {minipoolApiData.finalisedMinipoolCount}</p>
 
-<!-- {#each minipoolApiData.minipoolAddresses as pool}
-	<p>{pool}</p>
-{/each} -->
+<h3>Minipool Details</h3>
+
+<h3>Summary</h3>
+
+<p><b>All Nodes</b></p>
+<p>Balance: {formatCoinValue(aggregateBalances.total, 6)} ETH (add $ amt)</p>
+<p>Node Operator Share: {formatCoinValue(aggregateBalances.nodeShare, 6)} ETH (add $ amt)</p>
+<p>User Share: {formatCoinValue(aggregateBalances.userShare, 6)} ETH (add $ amt)</p>
+<p>Node Refund Balance: {formatCoinValue(aggregateBalances.refundBalance, 6)} ETH (add $ amt)</p>
+
+{#if minipoolApiData !== 'loading'}
+	{#each minipoolApiData.minipools as pool}
+		<p><b>{pool.address}</b></p>
+		<p>Balance: {formatCoinValue(pool.balance, 6)} ETH (add $ amt)</p>
+		<p>Deposit Type: {formatCoinValue(pool.nodeDepositBalance, 0)} ETH (add $ amt)</p>
+		<p>Node Refund Balance: {formatCoinValue(pool.nodeRefundBalance, 6)} ETH (add $ amt)</p>
+		<p>Commission Rate: {formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</p>
+		<p>nodeShare: {formatCoinValue(pool.nodeShare, 6)} ETH (add $ amt)</p>
+		<p>userShare: {formatCoinValue(pool.userShare, 6)} ETH (add $ amt)</p>
+	{/each}
+{/if}
 
 <style>
 	h1 {

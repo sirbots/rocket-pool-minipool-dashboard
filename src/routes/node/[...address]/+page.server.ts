@@ -1,4 +1,3 @@
-import type { EntryGenerator } from './$types';
 import type { PageServerLoad } from './$types';
 
 import { ethers } from 'ethers';
@@ -12,31 +11,37 @@ import rocketNodeManagerAbi from '$lib/abi/rocketpool/contracts/contract/node/Ro
 // Load the data for the client to consume
 /** @type {import('./$types').PageServerLoad} */
 export const load: PageServerLoad = async ({ params }) => {
-	// Initialize a connection to the Ethereum network
-	const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
+	try {
+		// Initialize a connection to the Ethereum network
+		const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
 
-	const rocketNodeManagerContract = await createContract(
-		'0x89F478E6Cc24f052103628f36598D4C14Da3D287',
-		rocketNodeManagerAbi,
-		provider,
-		false
-	);
+		const rocketNodeManagerContract = await createContract(
+			'0x89F478E6Cc24f052103628f36598D4C14Da3D287',
+			rocketNodeManagerAbi,
+			provider,
+			false
+		);
 
-	const nodeDetails = await getNodeDetails(rocketNodeManagerContract, params.address);
+		const nodeDetails = await getNodeDetails(rocketNodeManagerContract, params.address);
 
-	const registrationDate = new Date(Number(nodeDetails.registrationTime) * 1000);
-	const formattedRegistrationDate = new Intl.DateTimeFormat('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric'
-	}).format(registrationDate);
+		const registrationTime = nodeDetails.registrationTime;
 
-	return {
-		serverData: {
-			// From params
-			address: params.address,
-			timezone: nodeDetails.timezoneLocation,
-			formattedRegistrationDate: formattedRegistrationDate
-		}
-	};
+		const registrationDate = new Date(Number(registrationTime) * 1000);
+		const formattedRegistrationDate = new Intl.DateTimeFormat('en-US', {
+			year: 'numeric',
+			month: 'long',
+			day: 'numeric'
+		}).format(registrationDate);
+
+		return {
+			serverData: {
+				// From params
+				address: params.address,
+				timezone: nodeDetails.timezoneLocation,
+				formattedRegistrationDate: formattedRegistrationDate
+			}
+		};
+	} catch (error) {
+		console.error(error);
+	}
 };
