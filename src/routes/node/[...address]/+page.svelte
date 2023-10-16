@@ -11,9 +11,26 @@
 	$: ({ serverData } = data);
 
 	$: ethPrice = 'loading';
-	$: rplPrice = 0;
+	$: rplPrice = 'loading';
 	$: nodeApiData = 'loading';
-	$: minipoolApiData = 'loading';
+	$: minipoolApiData = {
+		minipoolCount: 'loading',
+		activeMinipoolCount: 'loading',
+		finalisedMinipoolCount: 'loading',
+		validatingMinipoolCount: 'loading',
+		minipools: 'loading'
+		// [
+		// 	{
+		// 		address: 'loading',
+		// 		balance: 'loading',
+		// 		nodeDepositBalance: 'loading',
+		// 		nodeRefundBalance: 'loading',
+		// 		minipoolCommissionRate: 'loading',
+		// 		nodeShare: 'loading',
+		// 		userShare: 'loading'
+		// 	}
+		// ]
+	};
 	$: aggregateBalances = {
 		total: 0,
 		nodeShare: 0,
@@ -92,7 +109,7 @@
 
 	<h4>
 		Total Node Balance:
-		{#if nodeApiData == 'loading'}
+		{#if nodeApiData == 'loading' || ethPrice == 'loading' || rplPrice == 'loading'}
 			<Jumper size={spinnerSize} />
 		{:else}
 			<span class="highlight">
@@ -164,9 +181,8 @@
 						{formatCoinValue(nodeApiData.balanceRPL, 4).toFixed(4)}
 					{/if}
 				</td>
-
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						${(formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice).toLocaleString('en-US', {
@@ -194,40 +210,74 @@
 		<tbody>
 			<tr>
 				<td>Maximum</td>
-				<td> {formatCoinValue(nodeApiData.maximumRPLStake, 0)}</td>
-				<td
-					>${(formatCoinValue(nodeApiData.maximumRPLStake, 2) * rplPrice).toLocaleString('en-us', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2
-					})}
+				<td>
+					{#if nodeApiData == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						{formatCoinValue(nodeApiData.maximumRPLStake, 0)}
+					{/if}
+				</td>
+				<td>
+					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						${(formatCoinValue(nodeApiData.maximumRPLStake, 2) * rplPrice).toLocaleString('en-us', {
+							minimumFractionDigits: 2,
+							maximumFractionDigits: 2
+						})}
+					{/if}
 				</td>
 				<td>150%</td>
 			</tr>
 			<tr class={belowMinimumStake ? 'belowMinimum' : ''}>
 				<td>Current</td>
-				<td>{formatCoinValue(nodeApiData.rplStake, 0)}</td>
 				<td>
-					${(formatCoinValue(nodeApiData.rplStake, 2) * rplPrice).toLocaleString('en-us', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2
-					})}
+					{#if nodeApiData == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						{formatCoinValue(nodeApiData.rplStake, 0)}
+					{/if}
 				</td>
 				<td>
-					{(
-						((formatCoinValue(nodeApiData.rplStake, 2) * rplPrice) /
-							(formatCoinValue(nodeApiData.ethMatched, 0) * ethPrice)) *
-						100
-					).toFixed(1)}%
+					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						${(formatCoinValue(nodeApiData.rplStake, 2) * rplPrice).toLocaleString('en-us', {
+							minimumFractionDigits: 2,
+							maximumFractionDigits: 2
+						})}
+					{/if}
+				</td>
+				<td>
+					{#if nodeApiData == 'loading' || rplPrice == 'loading' || ethPrice == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						{(
+							((formatCoinValue(nodeApiData.rplStake, 2) * rplPrice) /
+								(formatCoinValue(nodeApiData.ethMatched, 0) * ethPrice)) *
+							100
+						).toFixed(1)}%
+					{/if}
 				</td>
 			</tr>
 			<tr>
 				<td>Minimum</td>
-				<td>{formatCoinValue(nodeApiData.minimumRPLStake, 0)}</td>
-				<td
-					>${(formatCoinValue(nodeApiData.minimumRPLStake, 2) * rplPrice).toLocaleString('en-us', {
-						minimumFractionDigits: 2,
-						maximumFractionDigits: 2
-					})}
+				<td>
+					{#if nodeApiData == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						{formatCoinValue(nodeApiData.minimumRPLStake, 0)}
+					{/if}
+				</td>
+				<td>
+					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+						<Jumper size={spinnerSize} />
+					{:else}
+						${(formatCoinValue(nodeApiData.minimumRPLStake, 2) * rplPrice).toLocaleString('en-us', {
+							minimumFractionDigits: 2,
+							maximumFractionDigits: 2
+						})}
+					{/if}
 				</td>
 				<td>10%</td>
 			</tr>
@@ -248,13 +298,42 @@
 
 	<h2>Minipools</h2>
 	<ul class="minipoolStatusList">
-		<li>Total: {minipoolApiData.minipoolCount}</li>
-		<li>Active: {minipoolApiData.activeMinipoolCount}</li>
-		<li>Validating: {minipoolApiData.validatingMinipoolCount}</li>
-		<li>Finalized: {minipoolApiData.finalisedMinipoolCount}</li>
+		<li>
+			Total:
+			{#if minipoolApiData.minipoolCount == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.minipoolCount}
+			{/if}
+		</li>
+		<li>
+			Active:
+			{#if minipoolApiData.minipoolCount == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.activeMinipoolCount}
+			{/if}
+		</li>
+		<li>
+			Validating:
+			{#if minipoolApiData.minipoolCount == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.validatingMinipoolCount}
+			{/if}
+		</li>
+		<li>
+			Finalized:
+			{#if minipoolApiData.minipoolCount == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.finalisedMinipoolCount}
+			{/if}
+		</li>
 	</ul>
 
-	{#if minipoolApiData !== 'loading'}
+	<!-- Display minipool data if the API call is complete -->
+	{#if minipoolApiData.minipools !== 'loading'}
 		<table class="minipoolDetails">
 			<thead>
 				<tr>
@@ -290,6 +369,43 @@
 						<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
 						<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
 						<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	{:else}
+		<!-- Display the table in loading state while waiting for the API call to complete -->
+		<table class="minipoolDetails">
+			<thead>
+				<tr>
+					<th colspan="6">Minipool Details</th>
+				</tr>
+				<tr>
+					<td><b>Minipool</b></td>
+					<td><b>Pool Type</b></td>
+					<td><b>Commission</b></td>
+					<td><b>Balance (ETH)</b></td>
+					<td><b>Operator Share (ETH)</b></td>
+					<td><b>USD</b></td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Total</td>
+					<td>---</td>
+					<td>---</td>
+					<td><Jumper size={spinnerSize} /> </td>
+					<td><Jumper size={spinnerSize} /></td>
+					<td><Jumper size={spinnerSize} /></td>
+				</tr>
+				{#each { length: nodeApiData.minipoolCount } as _}
+					<tr>
+						<td>0x.....000</td>
+						<td><Jumper size={spinnerSize} /></td>
+						<td><Jumper size={spinnerSize} /></td>
+						<td><Jumper size={spinnerSize} /></td>
+						<td><Jumper size={spinnerSize} /></td>
+						<td><Jumper size={spinnerSize} /></td>
 					</tr>
 				{/each}
 			</tbody>
