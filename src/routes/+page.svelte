@@ -12,8 +12,10 @@
 <AddressForm />
 
 <div class="recentNodes">
-	<h3>Return to Your Last Search</h3>
-	<p><a href="/node/{data.nodeAddress}">{data.nodeAddress}</a></p>
+	{#if data.nodeAddress != undefined}
+		<h3>Return to Your Last Search</h3>
+		<p><a href="/node/{data.nodeAddress}">{data.nodeAddress}</a></p>
+	{/if}
 </div>
 
 <style>
