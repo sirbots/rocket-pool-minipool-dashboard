@@ -1,5 +1,4 @@
 <script lang="ts">
-	import rocketIcon from '$lib/images/rocket-icon.gif';
 	// Create a variable to store the input address from the form
 	$: inputAddress = '';
 
