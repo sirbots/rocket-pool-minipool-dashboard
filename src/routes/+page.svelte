@@ -8,6 +8,9 @@
 
 <h1>Get Data For Any Rocket Pool Node</h1>
 <h4>Search for your node to see staking and minipool data.</h4>
+<p class="centered">
+	(or <a href="/node/0x01454230a4a4b1188fB38e502829096218643978">try a random node</a>).
+</p>
 
 <AddressForm />
 
@@ -20,7 +23,9 @@
 
 <style>
 	/* Homepage styles */
-	/* Don't add too much here in case you switch to Tailwind. */
+	.centered {
+		text-align: center;
+	}
 	.recentNodes {
 		margin-top: 120px;
 		text-align: center;

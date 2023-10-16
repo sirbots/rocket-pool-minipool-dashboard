@@ -235,14 +235,14 @@
 	</table>
 
 	{#if belowMinimumStake}
-		<p>
-			Your node is under-collateralized. You need to stake {formatCoinValue(
+		<p style="margin: 30px 0 70px;">
+			Your node is under-collateralized. You need to stake an additional {formatCoinValue(
 				nodeApiData.minimumRPLStake - nodeApiData.rplStake,
 				2
 			).toFixed(1)} RPL (~${(
 				formatCoinValue(nodeApiData.minimumRPLStake - nodeApiData.rplStake, 2) * rplPrice
 			).toLocaleString('en-us', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) to begin
-			earning rewards on your staked RPL.
+			earning RPL staking rewards.
 		</p>
 	{/if}
 
@@ -262,7 +262,7 @@
 				</tr>
 				<tr>
 					<td><b>Minipool</b></td>
-					<td><b>Deposit Type</b></td>
+					<td><b>Pool Type</b></td>
 					<td><b>Commission</b></td>
 					<td><b>Balance (ETH)</b></td>
 					<td><b>Operator Share (ETH)</b></td>
@@ -287,8 +287,8 @@
 						>
 						<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
 						<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
-						<td>{formatCoinValue(pool.balance, 4)}</td>
-						<td>{formatCoinValue(pool.nodeShare, 4)}</td>
+						<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
+						<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
 						<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>
 					</tr>
 				{/each}
@@ -330,7 +330,7 @@
 		display: flex;
 		justify-content: space-between;
 		list-style: none;
-		padding: 0;
+		padding: 0 10%;
 		margin: 0;
 	}
 
@@ -347,7 +347,7 @@
 	}
 
 	thead th {
-		font-size: 1.8rem;
+		font-size: 1.5rem;
 	}
 	thead tr th {
 		background-color: var(--light-orange);
