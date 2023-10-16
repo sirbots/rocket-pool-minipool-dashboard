@@ -43,7 +43,8 @@ export async function GET({ url, setHeaders }) {
 			minimumRPLStake: Number(nodeDetails.minimumRPLStake),
 			maximumRPLStake: Number(nodeDetails.maximumRPLStake),
 			minipoolCount: Number(nodeDetails.minipoolCount),
-			smoothingPoolRegistrationState: smoothingPoolRegistrationState
+			smoothingPoolRegistrationState: smoothingPoolRegistrationState,
+			ethMatched: Number(nodeDetails.ethMatched)
 		});
 	} catch (error) {
 		console.error(error);

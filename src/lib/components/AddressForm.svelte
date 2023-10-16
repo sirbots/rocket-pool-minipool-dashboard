@@ -1,4 +1,5 @@
 <script lang="ts">
+	import rocketIcon from '$lib/images/rocket-icon.gif';
 	// Create a variable to store the input address from the form
 	$: inputAddress = '';
 
@@ -45,13 +46,13 @@
 		flex-direction: row;
 
 		justify-content: center;
-		margin: 50px 0;
+		margin: 50px 0 30px 0;
 	}
 	input {
-		border: 1px solid #ccc;
+		border: 1px solid var(--cream);
 		border-radius: 4px;
 		padding: 5px 10px;
-		height: 22px;
+		height: 30px;
 		min-width: 400px;
 	}
 
@@ -59,5 +60,21 @@
 		padding: 8px 10px;
 		width: 105px;
 		height: 100%;
+	}
+
+	.errorBox {
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		height: px;
+	}
+	.errorBox p {
+		width: 50%;
+		border: dotted 2px var(--red);
+		border-radius: var(--standard-radius);
+		font-size: 1.1rem;
+		color: var(--red);
+
+		padding: 12px 28px;
 	}
 </style>

@@ -6,12 +6,13 @@
 	export let data: { nodeAddress: string };
 </script>
 
-<h1>Rocket Pool Solo Staker Dashboard</h1>
+<h1>Get Data For Any Rocket Pool Node</h1>
+<h4>Search for your node to see staking and minipool data.</h4>
 
 <AddressForm />
 
 <div class="recentNodes">
-	<h3>Your Recently Viewed Nodes</h3>
+	<h3>Return to Your Last Search</h3>
 	<p><a href="/node/{data.nodeAddress}">{data.nodeAddress}</a></p>
 </div>
 

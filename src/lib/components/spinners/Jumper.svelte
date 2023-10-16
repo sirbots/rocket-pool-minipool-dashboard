@@ -10,20 +10,21 @@
 	let durationNum: string = duration.replace(durationUnitRegex, '');
 </script>
 
-<div class="wrapper" style="--size: {size}{unit}; --color: {color}; --duration: {duration};">
+<span class="wrapper" style="--size: {size}{unit}; --color: {color}; --duration: {duration};">
 	{#each range(3, 1) as version}
-		<div
+		<span
 			class="circle"
 			class:pause-animation={pause}
 			style="animation-delay: {(+durationNum / 3) * (version - 1) + durationUnit};"
 		/>
 	{/each}
-</div>
+</span>
 
 <style>
 	.wrapper {
 		width: var(--size);
 		height: var(--size);
+		display: inline-flex;
 	}
 	.circle {
 		border-radius: 100%;
