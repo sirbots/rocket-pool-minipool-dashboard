@@ -23,10 +23,10 @@
 		--white: #f5f3f3;
 		--cream: #cccccc;
 		--black: #101010;
-		--light-orange: #ff9757;
-		--dark-orange: #f06203;
+		--light-orange: rgb(253, 177, 118);
+		--dark-orange: #ff8e48;
 		--red: #da3434;
-		--blue: #2b6cb0;
+		--blue: #99aef4;
 
 		--standard-radius: 15px;
 	}
@@ -79,14 +79,18 @@
 	/* Header */
 	header {
 		display: flex;
+		flex-direction: column;
 		flex-wrap: row;
 		justify-content: center;
+		align-items: center;
 		padding: 80px 25px 25px 25px;
 	}
 	.logo {
 		padding: 14px 45px;
 		border-radius: var(--standard-radius);
 		border: 3px double #101010;
+		max-width: 200px;
+		margin-bottom: 20px;
 	}
 
 	.logo a {
@@ -106,11 +110,6 @@
 	}
 	:global(.highlight-blue) {
 		background-color: var(--blue);
-		padding: 4px 9px;
-		font-weight: bold;
-	}
-	:global(.highlight-dark-orange) {
-		background-color: var(--dark-orange);
 		padding: 4px 9px;
 		font-weight: bold;
 	}

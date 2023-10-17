@@ -156,6 +156,6 @@
 		justify-content: space-between;
 		list-style: none;
 		padding: 0 10%;
-		margin: 0;
+		margin: 20px 0 40px;
 	}
 </style>

@@ -18,6 +18,7 @@ interface provider {
 }
 
 interface NodeDetails {
+	message?: string;
 	balanceETH: bigint;
 	balanceRPL: bigint;
 	rplStake: bigint;

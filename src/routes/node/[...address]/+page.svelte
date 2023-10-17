@@ -7,13 +7,14 @@
 	import formatCoinValue from '$lib/formatCoinValue';
 
 	interface PageData {
-		requestStatus: string;
 		nodeAddress: string;
 		formattedRegistrationDate: string;
 		timezone: string;
 	}
 
 	export let data: PageData;
+
+	const spinnerSize = 25;
 
 	$: ethPrice = 0;
 	$: rplPrice = 0;
@@ -46,13 +47,17 @@
 		nodeStaked: 0
 	};
 
-	$: nodeDollarValue = 0;
-	$: minipoolDollarValue = 0; // move to minipools component
+	$: nodeDollarValue =
+		formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
+		formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
+		formatCoinValue(nodeApiData.rplStake, 6) * rplPrice;
+	$: minipoolDollarValue = minipoolDollarValue =
+		(formatCoinValue(minipoolBalance.nodeStaked, 6) +
+			formatCoinValue(minipoolBalance.nodeUnclaimed, 6)) *
+		ethPrice;
 	$: totalDollarValue = nodeDollarValue + minipoolDollarValue;
 
 	$: belowMinimumStake = false;
-
-	const spinnerSize = 25;
 
 	onMount(async () => {
 		// Get price data from the Coinmarketcap API
@@ -88,22 +93,27 @@
 		if (nodeApiData.rplStake < nodeApiData.minimumRPLStake) {
 			belowMinimumStake = true;
 		}
-
-		nodeDollarValue =
-			formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
-			formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
-			formatCoinValue(nodeApiData.rplStake, 6) * rplPrice;
-
-		// Calculate the total USD value of the node's minipools
-		minipoolDollarValue =
-			(formatCoinValue(minipoolBalance.nodeStaked, 6) +
-				formatCoinValue(minipoolBalance.nodeUnclaimed, 6)) *
-			ethPrice;
 	});
 </script>
 
-{#if data.requestStatus !== 'invalid-node-address'}
+{#if data.message !== 'invalid-node-address'}
 	<h1>Rocket Pool Node</h1>
+	<div class="prices">
+		<div class="priceBox">
+			<span class="highlight-blue">ETH</span>
+			{ethPrice.toLocaleString('en-US', {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			})}
+		</div>
+		<div class="priceBox">
+			<span class="highlight">RPL</span> ${rplPrice.toLocaleString('en-US', {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			})}
+		</div>
+	</div>
+
 	<p>
 		The node at <span class="highlight">{data.nodeAddress}</span> was registered on {data.formattedRegistrationDate}
 		in {data.timezone}. It is currently opted
@@ -127,13 +137,7 @@
 					minimumFractionDigits: 2,
 					maximumFractionDigits: 2
 				})}</span
-			>, based on a current price of ${ethPrice.toLocaleString('en-US', {
-				minimumFractionDigits: 2,
-				maximumFractionDigits: 2
-			})} for <span class="highlight-blue">ETH</span> and ${rplPrice.toLocaleString('en-US', {
-				minimumFractionDigits: 2,
-				maximumFractionDigits: 2
-			})} for <span class="highlight-dark-orange">RPL</span>.
+			>
 		{/if}
 	</p>
 
@@ -141,7 +145,7 @@
 
 	<p class="centered">
 		Total Node Value:
-		{#if nodeApiData.status == 'loading' || ethPrice == 0 || rplPrice == 0}
+		{#if nodeDollarValue == 0}
 			<Jumper size={spinnerSize} />
 		{:else}
 			<span class="highlight">
@@ -346,25 +350,33 @@
 	<p>
 		Try <a href={`https://etherscan.io/address/${data.nodeAddress}`}
 			>looking up the address on Etherscan</a
-		> to confirm that it's correct.
+		> to confirm that it exactly matches what you entered (Etherscan sometimes corrects incorrect capitalizations
+		of letters).
 	</p>
 {/if}
 
 <style>
 	h1 {
-		font-size: 1.5rem;
+		margin: 45px 0;
 	}
 	h2 {
-		margin: 45px 0;
+		margin: 80px 0 25px;
 	}
 
 	.belowMinimum {
 		color: var(--red);
 	}
 
+	.prices {
+		display: flex;
+		justify-content: space-evenly;
+		padding: 0 15%;
+		margin: 60px 0 40px;
+	}
+
 	/* All Tables */
 	:global(table) {
-		margin: 40px 0 90px;
+		margin: 60px 0 70px;
 		border-collapse: collapse;
 		width: 100%;
 		text-align: center;
@@ -378,7 +390,7 @@
 		font-size: 1.5rem;
 	}
 	:global(thead tr th) {
-		background-color: var(--light-orange);
+		background-color: var(--dark-orange);
 	}
 	:global(thead tr td) {
 		padding: 10px 0 0 5px;
