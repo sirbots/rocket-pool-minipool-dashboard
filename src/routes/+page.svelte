@@ -6,6 +6,14 @@
 	export let data: { nodeAddress: string };
 </script>
 
+<svelte:head>
+	<title>Rocket Pool Node and Minipool Dashboard</title>
+	<meta
+		name="description"
+		content="View data for Rocket Pool staking nodes. See the node balance, unclaimed earnings, and minipool earnings."
+	/>
+</svelte:head>
+
 <h1>Get Data For Any Rocket Pool Node</h1>
 <h4>Search for your node to see staking and minipool data.</h4>
 <p class="centered">

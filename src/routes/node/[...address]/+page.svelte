@@ -96,6 +96,14 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Rocket Pool Node: {data.nodeAddress}</title>
+	<meta
+		name="description"
+		content="View data for the Rocket Pool staking node at {data.nodeAddress}. See the node balance, unclaimed earnings, and minipool earnings."
+	/>
+</svelte:head>
+
 {#if data.message !== 'invalid-node-address'}
 	<h1>Rocket Pool Node</h1>
 	<div class="prices">

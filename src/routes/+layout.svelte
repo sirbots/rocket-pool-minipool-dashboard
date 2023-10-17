@@ -13,7 +13,10 @@
 
 <footer>
 	<div class="builtBy">
-		<p>Built by <a href="/">my name</a>.</p>
+		<p>
+			Built by <a href="/">@sirbots ENS domain</a> (<a href="https://twitter.com">Twitter</a> |
+			<a href="https://warpcast.com">Warpcast/Farcaster</a>)
+		</p>
 	</div>
 </footer>
 
@@ -83,7 +86,7 @@
 		flex-wrap: row;
 		justify-content: center;
 		align-items: center;
-		padding: 80px 25px 25px 25px;
+		padding: 100px 25px 25px 25px;
 	}
 	.logo {
 		padding: 14px 45px;
@@ -124,6 +127,7 @@
 		justify-content: center;
 
 		color: var(--white);
-		margin-top: 150px;
+		margin-top: 100px;
+		padding-bottom: 100px;
 	}
 </style>
