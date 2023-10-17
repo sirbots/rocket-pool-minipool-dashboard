@@ -27,10 +27,8 @@ export const load: PageServerLoad = async ({ params }) => {
 		// Handle invalid node address
 		if (nodeDetails.message == 'invalid-node-address') {
 			return {
-				serverData: {
-					address: params.address,
-					message: nodeDetails.message
-				}
+				nodeAddress: params.address,
+				message: nodeDetails.message
 			};
 		}
 
@@ -44,16 +42,12 @@ export const load: PageServerLoad = async ({ params }) => {
 		}).format(registrationDate);
 
 		return {
-			serverData: {
-				// From params
-				address: params.address,
-				timezone: nodeDetails.timezoneLocation,
-				formattedRegistrationDate: formattedRegistrationDate
-			}
+			nodeAddress: params.address,
+			timezone: nodeDetails.timezoneLocation,
+			formattedRegistrationDate: formattedRegistrationDate
 		};
 	} catch (error) {
 		console.log('*** ERROR MESSAGE ***');
 		console.error(error);
-		// console.error(message);
 	}
 };

@@ -1,42 +1,55 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
+	import MinipoolDetailsTable from '$lib/components/MinipoolDetailsTable.svelte';
 	import Jumper from '$lib/components/spinners/Jumper.svelte';
 
-	import formatCoinValue from '../../../lib/formatCoinValue';
+	import formatCoinValue from '$lib/formatCoinValue';
+
+	interface PageData {
+		requestStatus: string;
+		nodeAddress: string;
+		formattedRegistrationDate: string;
+		timezone: string;
+	}
 
 	export let data: PageData;
 
-	// destructure the server data for easier use
-	$: ({ serverData } = data);
-
-	$: ethPrice = 'loading';
-	$: rplPrice = 'loading';
-	$: nodeApiData = 'loading';
+	$: ethPrice = 0;
+	$: rplPrice = 0;
+	$: nodeApiData = {
+		status: 'loading',
+		balanceETH: 0n,
+		balanceRPL: 0n,
+		rplStake: 0n,
+		effectiveRPLStake: 0n,
+		minimumRPLStake: 0n,
+		maximumRPLStke: 0n,
+		minipoolCount: 0n,
+		ethMatched: 0n,
+		smoothingPoolRegistrationState: false
+	};
 	$: minipoolApiData = {
-		minipoolCount: 'loading',
-		activeMinipoolCount: 'loading',
-		finalisedMinipoolCount: 'loading',
-		validatingMinipoolCount: 'loading',
+		minipoolCount: 0,
+		activeMinipoolCount: 0,
+		finalisedMinipoolCount: 0,
+		validatingMinipoolCount: 0,
+		// TO DO: Build out the empty minipools object so we have the types
 		minipools: 'loading'
-		// [
-		// 	{
-		// 		address: 'loading',
-		// 		balance: 'loading',
-		// 		nodeDepositBalance: 'loading',
-		// 		nodeRefundBalance: 'loading',
-		// 		minipoolCommissionRate: 'loading',
-		// 		nodeShare: 'loading',
-		// 		userShare: 'loading'
-		// 	}
-		// ]
 	};
-	$: aggregateBalances = {
-		total: 0,
-		nodeShare: 0,
-		userShare: 0,
-		refundBalance: 0
+
+	$: minipoolBalance = {
+		totalUnclaimed: 0,
+		nodeUnclaimed: 0,
+		userUnclaimed: 0,
+		refundBalance: 0,
+		nodeStaked: 0
 	};
+
+	$: nodeDollarValue = 0;
+	$: minipoolDollarValue = 0; // move to minipools component
+	$: totalDollarValue = nodeDollarValue + minipoolDollarValue;
+
 	$: belowMinimumStake = false;
 
 	const spinnerSize = 25;
@@ -48,53 +61,52 @@
 
 		// Get node data from the Ethers/Rocket Pool API
 		nodeApiData = await fetch(
-			`../../api/rocket-pool/rocket-node-manager?nodeAddress=${serverData.address}`
+			`../../api/rocket-pool/rocket-node-manager?nodeAddress=${data.nodeAddress}`
 		).then((res) => res.json());
 
 		// Get minipool data from the Ethers/Rocket Pool API
 		minipoolApiData = await fetch(
-			`../../api/rocket-pool/minipool-manager?nodeAddress=${serverData.address}`
+			`../../api/rocket-pool/minipool-manager?nodeAddress=${data.nodeAddress}`
 		).then((res) => res.json());
 
 		// Helpers functions to aggregate the minipool data
 		async function aggregateMinipoolData(minipools) {
-			let total = 0;
-			let nodeShare = 0;
-			let userShare = 0;
-			let refundBalance = 0;
-
 			for (const pool of minipools) {
-				total += pool.balance;
-				nodeShare += pool.nodeShare;
-				userShare += pool.userShare;
-				refundBalance += pool.nodeRefundBalance;
-			}
+				// Update the minipoolBalance
+				minipoolBalance.totalUnclaimed += pool.balance;
+				minipoolBalance.nodeUnclaimed += pool.nodeShare;
+				minipoolBalance.userUnclaimed += pool.userShare;
+				minipoolBalance.refundBalance += pool.nodeRefundBalance;
 
-			aggregateBalances = {
-				total: total,
-				nodeShare: nodeShare,
-				userShare: userShare,
-				refundBalance: refundBalance
-			};
+				// Calculate the total ETH owned by the node owner
+				minipoolBalance.nodeStaked += pool.nodeDepositBalance;
+			}
 		}
+
 		await aggregateMinipoolData(minipoolApiData.minipools);
 
 		if (nodeApiData.rplStake < nodeApiData.minimumRPLStake) {
 			belowMinimumStake = true;
 		}
-	});
 
-	// Helpers
-	function truncateAddress(address) {
-		return address.slice(0, 6) + '...' + address.slice(-4);
-	}
+		nodeDollarValue =
+			formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
+			formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
+			formatCoinValue(nodeApiData.rplStake, 6) * rplPrice;
+
+		// Calculate the total USD value of the node's minipools
+		minipoolDollarValue =
+			(formatCoinValue(minipoolBalance.nodeStaked, 6) +
+				formatCoinValue(minipoolBalance.nodeUnclaimed, 6)) *
+			ethPrice;
+	});
 </script>
 
-{#if serverData.message !== 'invalid-node-address'}
+{#if data.requestStatus !== 'invalid-node-address'}
 	<h1>Rocket Pool Node</h1>
 	<p>
-		The node at <span class="highlight">{serverData.address}</span>, was registered on {serverData.formattedRegistrationDate}
-		in {serverData.timezone}. It is currently opted
+		The node at <span class="highlight">{data.nodeAddress}</span> was registered on {data.formattedRegistrationDate}
+		in {data.timezone}. It is currently opted
 		{#if nodeApiData.smoothingPoolRegistrationState == true}
 			into
 		{:else if nodeApiData.smoothingPoolRegistrationState == false}
@@ -105,22 +117,35 @@
 		the smoothing pool.
 	</p>
 
+	<p>
+		The total operator's share of the node + minipools is
+		{#if totalDollarValue == 0}
+			<Jumper size={spinnerSize} />
+		{:else}
+			<span class="highlight"
+				>{totalDollarValue.toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2
+				})}</span
+			>
+		{/if}
+	</p>
+
 	<h2>Node Data</h2>
 
-	<h4>
-		Total Node Balance:
-		{#if nodeApiData == 'loading' || ethPrice == 'loading' || rplPrice == 'loading'}
+	<p class="centered">
+		Total Node Value:
+		{#if nodeApiData.status == 'loading' || ethPrice == 0 || rplPrice == 0}
 			<Jumper size={spinnerSize} />
 		{:else}
 			<span class="highlight">
-				${(
-					formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
-					formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
-					formatCoinValue(nodeApiData.rplStake, 6) * rplPrice
-				).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+				${nodeDollarValue.toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2
+				})}
 			</span>
 		{/if}
-	</h4>
+	</p>
 
 	<table>
 		<thead>
@@ -139,7 +164,7 @@
 			<tr>
 				<td>ETH</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.balanceETH, 4).toFixed(4)}
@@ -147,14 +172,14 @@
 				</td>
 				<td>TBD</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.balanceETH, 4).toFixed(4)}
 					{/if}
 				</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						${(formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice).toLocaleString('en-US', {
@@ -167,7 +192,7 @@
 			<tr>
 				<td>RPL</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.balanceRPL, 4).toFixed(4)}
@@ -175,14 +200,14 @@
 				</td>
 				<td>TBD</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.balanceRPL, 4).toFixed(4)}
 					{/if}
 				</td>
 				<td>
-					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+					{#if nodeApiData.status == 'loading' || rplPrice == 0}
 						<Jumper size={spinnerSize} />
 					{:else}
 						${(formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice).toLocaleString('en-US', {
@@ -211,14 +236,14 @@
 			<tr>
 				<td>Maximum</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.maximumRPLStake, 0)}
 					{/if}
 				</td>
 				<td>
-					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+					{#if nodeApiData.status == 'loading' || rplPrice == 0}
 						<Jumper size={spinnerSize} />
 					{:else}
 						${(formatCoinValue(nodeApiData.maximumRPLStake, 2) * rplPrice).toLocaleString('en-us', {
@@ -232,14 +257,14 @@
 			<tr class={belowMinimumStake ? 'belowMinimum' : ''}>
 				<td>Current</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.rplStake, 0)}
 					{/if}
 				</td>
 				<td>
-					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+					{#if nodeApiData.status == 'loading' || rplPrice == 0}
 						<Jumper size={spinnerSize} />
 					{:else}
 						${(formatCoinValue(nodeApiData.rplStake, 2) * rplPrice).toLocaleString('en-us', {
@@ -249,7 +274,7 @@
 					{/if}
 				</td>
 				<td>
-					{#if nodeApiData == 'loading' || rplPrice == 'loading' || ethPrice == 'loading'}
+					{#if nodeApiData.status == 'loading' || ethPrice == 0 || rplPrice == 0}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{(
@@ -263,14 +288,14 @@
 			<tr>
 				<td>Minimum</td>
 				<td>
-					{#if nodeApiData == 'loading'}
+					{#if nodeApiData.status == 'loading'}
 						<Jumper size={spinnerSize} />
 					{:else}
 						{formatCoinValue(nodeApiData.minimumRPLStake, 0)}
 					{/if}
 				</td>
 				<td>
-					{#if nodeApiData == 'loading' || rplPrice == 'loading'}
+					{#if nodeApiData.status == 'loading' || rplPrice == 0}
 						<Jumper size={spinnerSize} />
 					{:else}
 						${(formatCoinValue(nodeApiData.minimumRPLStake, 2) * rplPrice).toLocaleString('en-us', {
@@ -296,131 +321,24 @@
 		</p>
 	{/if}
 
-	<h2>Minipools</h2>
-	<ul class="minipoolStatusList">
-		<li>
-			Total:
-			{#if minipoolApiData.minipoolCount == 'loading'}
-				<Jumper size={spinnerSize} />
-			{:else}
-				{minipoolApiData.minipoolCount}
-			{/if}
-		</li>
-		<li>
-			Active:
-			{#if minipoolApiData.minipoolCount == 'loading'}
-				<Jumper size={spinnerSize} />
-			{:else}
-				{minipoolApiData.activeMinipoolCount}
-			{/if}
-		</li>
-		<li>
-			Validating:
-			{#if minipoolApiData.minipoolCount == 'loading'}
-				<Jumper size={spinnerSize} />
-			{:else}
-				{minipoolApiData.validatingMinipoolCount}
-			{/if}
-		</li>
-		<li>
-			Finalized:
-			{#if minipoolApiData.minipoolCount == 'loading'}
-				<Jumper size={spinnerSize} />
-			{:else}
-				{minipoolApiData.finalisedMinipoolCount}
-			{/if}
-		</li>
-	</ul>
-
-	<!-- Display minipool data if the API call is complete -->
-	{#if minipoolApiData.minipools !== 'loading'}
-		<table class="minipoolDetails">
-			<thead>
-				<tr>
-					<th colspan="6">Minipool Details</th>
-				</tr>
-				<tr>
-					<td><b>Minipool</b></td>
-					<td><b>Pool Type</b></td>
-					<td><b>Commission</b></td>
-					<td><b>Balance (ETH)</b></td>
-					<td><b>Operator Share (ETH)</b></td>
-					<td><b>USD</b></td>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Total</td>
-					<td>---</td>
-					<td>---</td>
-					<td>{formatCoinValue(aggregateBalances.total, 4)} </td>
-					<td>{formatCoinValue(aggregateBalances.nodeShare, 4)}</td>
-					<td>${(formatCoinValue(aggregateBalances.nodeShare, 6) * ethPrice).toFixed(2)}</td>
-				</tr>
-				{#each minipoolApiData.minipools as pool}
-					<tr>
-						<td
-							><a href={`https://etherscan.io/address/${pool.address}`}
-								>{truncateAddress(pool.address)}</a
-							></td
-						>
-						<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
-						<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
-						<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
-						<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
-						<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	{:else}
-		<!-- Display the table in loading state while waiting for the API call to complete -->
-		<table class="minipoolDetails">
-			<thead>
-				<tr>
-					<th colspan="6">Minipool Details</th>
-				</tr>
-				<tr>
-					<td><b>Minipool</b></td>
-					<td><b>Pool Type</b></td>
-					<td><b>Commission</b></td>
-					<td><b>Balance (ETH)</b></td>
-					<td><b>Operator Share (ETH)</b></td>
-					<td><b>USD</b></td>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>Total</td>
-					<td>---</td>
-					<td>---</td>
-					<td><Jumper size={spinnerSize} /> </td>
-					<td><Jumper size={spinnerSize} /></td>
-					<td><Jumper size={spinnerSize} /></td>
-				</tr>
-				{#each { length: nodeApiData.minipoolCount } as _}
-					<tr>
-						<td>0x.....000</td>
-						<td><Jumper size={spinnerSize} /></td>
-						<td><Jumper size={spinnerSize} /></td>
-						<td><Jumper size={spinnerSize} /></td>
-						<td><Jumper size={spinnerSize} /></td>
-						<td><Jumper size={spinnerSize} /></td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	{/if}
+	<MinipoolDetailsTable
+		{nodeApiData}
+		{minipoolApiData}
+		{minipoolBalance}
+		{spinnerSize}
+		{ethPrice}
+		{minipoolDollarValue}
+	/>
 {:else}
 	<h1>Invalid node address</h1>
 
 	<p>
 		Are you sure you entered the address correctly? Ethers.js was not able to access node data at <b
-			>{serverData.address}.</b
+			>{data.nodeAddress}.</b
 		>
 	</p>
 	<p>
-		Try <a href={`https://etherscan.io/address/${serverData.address}`}
+		Try <a href={`https://etherscan.io/address/${data.nodeAddress}`}
 			>looking up the address on Etherscan</a
 		> to confirm that it's correct.
 	</p>
@@ -433,42 +351,30 @@
 	h2 {
 		margin: 45px 0;
 	}
-	.highlight {
-		background-color: var(--light-orange);
-		padding: 4px 9px;
-		font-weight: bold;
-	}
+
 	.belowMinimum {
 		color: var(--red);
 	}
 
-	ul.minipoolStatusList {
-		display: flex;
-		justify-content: space-between;
-		list-style: none;
-		padding: 0 10%;
-		margin: 0;
-	}
-
 	/* All Tables */
-	table {
-		margin: 70px 0 0 0;
+	:global(table) {
+		margin: 40px 0 90px;
 		border-collapse: collapse;
 		width: 100%;
 		text-align: center;
 	}
-	thead {
+	:global(thead) {
 		background-color: var(--cream);
 		color: var(--black);
 	}
 
-	thead th {
+	:global(thead th) {
 		font-size: 1.5rem;
 	}
-	thead tr th {
+	:global(thead tr th) {
 		background-color: var(--light-orange);
 	}
-	thead tr td {
+	:global(thead tr td) {
 		padding: 10px 0 0 5px;
 		font-weight: bold;
 		font-size: 1rem;

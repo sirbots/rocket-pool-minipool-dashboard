@@ -23,9 +23,6 @@
 
 <style>
 	/* Homepage styles */
-	.centered {
-		text-align: center;
-	}
 	.recentNodes {
 		margin-top: 120px;
 		text-align: center;

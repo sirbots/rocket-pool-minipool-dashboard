@@ -98,6 +98,14 @@
 	.container {
 		padding: 125px 15%;
 	}
+	:global(.highlight) {
+		background-color: var(--light-orange);
+		padding: 4px 9px;
+		font-weight: bold;
+	}
+	:global(.centered) {
+		text-align: center;
+	}
 
 	/* Footer */
 	footer {

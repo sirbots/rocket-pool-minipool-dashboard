@@ -5,7 +5,7 @@ import { env } from '$env/dynamic/private';
 import { createContract } from '$lib/rocketPoolContractCalls';
 
 import { rocketNodeManagerAddress } from '$lib/smartContractAddresses';
-import rocketNodeManagerAbi from '../../../../lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
+import rocketNodeManagerAbi from '$lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
 
 // Initialize a connection to the Ethereum network
 const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });

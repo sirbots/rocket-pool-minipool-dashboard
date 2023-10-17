@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 interface RocketNodeManagerContract {
-	getNodeDetails(nodeAddress: string): Promise<string>;
+	getNodeDetails(nodeAddress: string): Promise<NodeDetails>;
 	getSmoothingPoolRegistrationState(nodeAddress: string): Promise<boolean>;
 }
 
@@ -15,6 +15,18 @@ interface MinipoolManagerContract {
 
 interface provider {
 	provider: ethers.AbstractProvider;
+}
+
+interface NodeDetails {
+	balanceETH: bigint;
+	balanceRPL: bigint;
+	rplStake: bigint;
+	effectiveRPLStake: bigint;
+	minimumRPLStake: bigint;
+	maximumRPLStake: bigint;
+	minipoolCount: bigint;
+	smoothingPoolRegistrationState: boolean;
+	ethMatched: bigint;
 }
 
 // Create a contract object
@@ -41,10 +53,11 @@ async function createContract(
 /*****************************
  * RocketNodeManager.sol Calls
  *****************************/
+
 async function getNodeDetails(
 	rocketNodeManagerContract: RocketNodeManagerContract,
 	nodeAddress: string
-) {
+): Promise<NodeDetails> {
 	try {
 		const nodeDetails = await rocketNodeManagerContract.getNodeDetails(nodeAddress);
 

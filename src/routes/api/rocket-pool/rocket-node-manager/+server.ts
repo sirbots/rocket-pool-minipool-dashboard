@@ -9,7 +9,7 @@ import {
 	getSmoothingPoolRegistrationState
 } from '$lib/rocketPoolContractCalls';
 
-import rocketNodeManagerAbi from '../../../../lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
+import rocketNodeManagerAbi from '$lib/abi/rocketpool/contracts/contract/node/RocketNodeManager.json';
 
 // Initialize a connection to the Ethereum network
 const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
@@ -26,6 +26,7 @@ export async function GET({ url, setHeaders }) {
 		const nodeAddress = url.searchParams.get('nodeAddress');
 
 		const nodeDetails = await getNodeDetails(rocketNodeManagerContract, nodeAddress);
+
 		const smoothingPoolRegistrationState = await getSmoothingPoolRegistrationState(
 			rocketNodeManagerContract,
 			nodeAddress
@@ -36,6 +37,7 @@ export async function GET({ url, setHeaders }) {
 		});
 
 		return json({
+			status: 'complete',
 			balanceETH: Number(nodeDetails.balanceETH),
 			balanceRPL: Number(nodeDetails.balanceRPL),
 			rplStake: Number(nodeDetails.rplStake),
