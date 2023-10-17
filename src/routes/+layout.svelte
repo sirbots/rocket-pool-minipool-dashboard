@@ -2,7 +2,7 @@
 </script>
 
 <header>
-	<div class="logo"><a href="/">Rocket Dash</a></div>
+	<div class="logo"><a href="/" data-umami-event="click_header_logo">Rocket Dash</a></div>
 </header>
 
 <div class="container">
@@ -14,8 +14,12 @@
 <footer>
 	<div class="builtBy">
 		<p>
-			Built by <a href="/">@sirbots ENS domain</a> (<a href="https://twitter.com">Twitter</a> |
-			<a href="https://warpcast.com">Warpcast/Farcaster</a>)
+			Built by @sirbots.eth (<a
+				href="https://twitter.com/fun_and_profit"
+				data-umami-event="click_Twitter_profile">Twitter</a
+			>
+			|
+			<a href="https://warpcast.com/sirbots" data-umami-event="click_Warpcast_profile">Warpcast</a>)
 		</p>
 	</div>
 </footer>
@@ -23,13 +27,13 @@
 <style>
 	/* Set global styles */
 	:root {
-		--white: #f5f3f3;
-		--cream: #cccccc;
-		--black: #101010;
-		--light-orange: rgb(253, 177, 118);
-		--dark-orange: #ff8e48;
-		--red: #da3434;
-		--blue: #99aef4;
+		--white: #fffcf0;
+		--cream: #e6e4d9;
+		--black: #100f0f;
+		--light-orange: #da702c;
+		--dark-orange: #bc5215;
+		--red: #d14d41;
+		--blue: #4385be;
 
 		--standard-radius: 15px;
 	}

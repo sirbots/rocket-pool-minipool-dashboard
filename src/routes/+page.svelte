@@ -17,7 +17,10 @@
 <h1>Get Data For Any Rocket Pool Node</h1>
 <h4>Search for your node to see staking and minipool data.</h4>
 <p class="centered">
-	(or <a href="/node/0x01454230a4a4b1188fB38e502829096218643978">try a random node</a>).
+	(or <a
+		href="/node/0x01454230a4a4b1188fB38e502829096218643978"
+		data-umami-event="click_random_node">try a random node</a
+	>).
 </p>
 
 <AddressForm />
@@ -25,7 +28,9 @@
 <div class="recentNodes">
 	{#if data.nodeAddress != undefined}
 		<h3>Return to Your Last Search</h3>
-		<p><a href="/node/{data.nodeAddress}">{data.nodeAddress}</a></p>
+		<p>
+			<a href="/node/{data.nodeAddress}" data-umami-event="click_recent_node">{data.nodeAddress}</a>
+		</p>
 	{/if}
 </div>
 

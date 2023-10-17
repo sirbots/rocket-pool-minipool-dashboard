@@ -356,8 +356,9 @@
 		>
 	</p>
 	<p>
-		Try <a href={`https://etherscan.io/address/${data.nodeAddress}`}
-			>looking up the address on Etherscan</a
+		Try <a
+			href={`https://etherscan.io/address/${data.nodeAddress}`}
+			data-umami-event="click_Etherscan_lookup">looking up the address on Etherscan</a
 		> to confirm that it exactly matches what you entered (Etherscan sometimes corrects incorrect capitalizations
 		of letters).
 	</p>
@@ -396,6 +397,7 @@
 
 	:global(thead th) {
 		font-size: 1.5rem;
+		color: var(--white);
 	}
 	:global(thead tr th) {
 		background-color: var(--dark-orange);

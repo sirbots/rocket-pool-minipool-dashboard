@@ -94,8 +94,9 @@
 			{#each minipoolApiData.minipools as pool}
 				<tr>
 					<td
-						><a href={`https://etherscan.io/address/${pool.address}`}
-							>{truncateAddress(pool.address)}</a
+						><a
+							href={`https://etherscan.io/address/${pool.address}`}
+							data-umami-event="click_minipool_address">{truncateAddress(pool.address)}</a
 						></td
 					>
 					<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
