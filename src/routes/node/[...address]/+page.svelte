@@ -123,11 +123,17 @@
 			<Jumper size={spinnerSize} />
 		{:else}
 			<span class="highlight"
-				>{totalDollarValue.toLocaleString('en-US', {
+				>${totalDollarValue.toLocaleString('en-US', {
 					minimumFractionDigits: 2,
 					maximumFractionDigits: 2
 				})}</span
-			>
+			>, based on a current price of ${ethPrice.toLocaleString('en-US', {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			})} for <span class="highlight-blue">ETH</span> and ${rplPrice.toLocaleString('en-US', {
+				minimumFractionDigits: 2,
+				maximumFractionDigits: 2
+			})} for <span class="highlight-dark-orange">RPL</span>.
 		{/if}
 	</p>
 

@@ -26,6 +26,7 @@
 		--light-orange: #ff9757;
 		--dark-orange: #f06203;
 		--red: #da3434;
+		--blue: #2b6cb0;
 
 		--standard-radius: 15px;
 	}
@@ -100,6 +101,16 @@
 	}
 	:global(.highlight) {
 		background-color: var(--light-orange);
+		padding: 4px 9px;
+		font-weight: bold;
+	}
+	:global(.highlight-blue) {
+		background-color: var(--blue);
+		padding: 4px 9px;
+		font-weight: bold;
+	}
+	:global(.highlight-dark-orange) {
+		background-color: var(--dark-orange);
 		padding: 4px 9px;
 		font-weight: bold;
 	}
