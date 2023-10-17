@@ -16,9 +16,6 @@ export const actions: import('./$types').Actions = {
 		const data = await request.formData();
 		const nodeAddress = data.get('nodeAddress') as string;
 
-		// Fire Umami event
-		umami.track('node_lookup_form_submit');
-
 		// Set a cookie with the node address
 		console.log(`Setting cookie for node address ${nodeAddress}...`);
 		cookies.set('nodeAddress', nodeAddress, { path: '/' });

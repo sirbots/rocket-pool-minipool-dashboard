@@ -30,7 +30,9 @@
 			on:blur={handleBlur}
 		/>
 
-		<button type="submit" disabled={!addressValid}>View Node</button>
+		<button type="submit" disabled={!addressValid} data-umami-event="node_lookup_form_submit"
+			>View Node</button
+		>
 	</form>
 </div>
 <div class="errorBox">
