@@ -1,4 +1,6 @@
 <script lang="ts">
+	// Fire Umami event
+	umami.track('404_page_view');
 </script>
 
 <h1>oh no! error!</h1>
