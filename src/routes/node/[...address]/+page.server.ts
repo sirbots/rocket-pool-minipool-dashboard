@@ -26,9 +26,6 @@ export const load: PageServerLoad = async ({ params }) => {
 
 		// Handle invalid node address
 		if (nodeDetails.message == 'invalid-node-address') {
-			// Fire Umami event
-			umami.track('invalid_node_lookup');
-
 			return {
 				nodeAddress: params.address,
 				message: nodeDetails.message

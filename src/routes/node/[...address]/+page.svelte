@@ -93,6 +93,10 @@
 		if (nodeApiData.rplStake < nodeApiData.minimumRPLStake) {
 			belowMinimumStake = true;
 		}
+
+		if (data.message == 'invalid-node-address') {
+			umami.track('invalid_node_lookup');
+		}
 	});
 </script>
 
