@@ -122,15 +122,12 @@
 			})(window, document);
 		})();
 
-		if (!dev) {
-			amplitude.init('9ff1fb930acca3ec495c354f6f5d9dd4', null, {
+		amplitude.init('9ff1fb930acca3ec495c354f6f5d9dd4', null, {
 			// optional configuration options
 			saveEvents: true,
 			includeUtm: true,
 			includeReferrer: true,
 			platform: 'Web'
-		}
-		
 		});
 	</script>
 </svelte:head>
