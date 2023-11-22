@@ -18,11 +18,11 @@ import genericMinipooContractAbiJson from '$lib/abi/GenericMinipoolContract.json
 // Initialize a connection to the Ethereum network
 const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
 
-const genericMinipooContractAbi = new ethers.utils.Interface(genericMinipooContractAbiJson);
-const rocketMinipoolManagerAbi = new ethers.utils.Interface(rocketMinipoolManagerAbiJson);
+const genericMinipooContractAbi = new ethers.Interface(genericMinipooContractAbiJson);
+const rocketMinipoolManagerAbi = new ethers.Interface(rocketMinipoolManagerAbiJson);
 
 // Create the RocketMinipoolManager contract object
-const minipoolManager = await createContract(
+const minipoolManagerContract = await createContract(
 	rocketMinipoolManagerAddress,
 	rocketMinipoolManagerAbi,
 	provider,
@@ -34,20 +34,23 @@ export async function GET({ url, setHeaders }) {
 		const nodeAddress = url.searchParams.get('nodeAddress');
 
 		// Get minipool data for a single node
-		const minipoolCount = await getNodeMiniPoolCount(minipoolManager, nodeAddress);
-		const activeMinipoolCount = await getNodeActiveMiniPoolCount(minipoolManager, nodeAddress);
+		const minipoolCount = await getNodeMiniPoolCount(minipoolManagerContract, nodeAddress);
+		const activeMinipoolCount = await getNodeActiveMiniPoolCount(
+			minipoolManagerContract,
+			nodeAddress
+		);
 		const finalisedMinipoolCount = await getNodeFinalisedMinipoolCount(
-			minipoolManager,
+			minipoolManagerContract,
 			nodeAddress
 		);
 		const validatingMinipoolCount = await getNodeValidatingMinipoolCount(
-			minipoolManager,
+			minipoolManagerContract,
 			nodeAddress
 		);
 
 		// Collect the individual minipool data
 		const minipoolAddresses = await getMinipoolAddresses(
-			minipoolManager,
+			minipoolManagerContract,
 			nodeAddress,
 			minipoolCount
 		);

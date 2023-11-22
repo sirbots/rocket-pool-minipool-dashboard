@@ -1,11 +1,12 @@
-import { ethers } from 'ethers';
+import { Interface, ethers } from 'ethers';
 
+// Types
 interface RocketNodeManagerContract {
 	getNodeDetails(nodeAddress: string): Promise<NodeDetails>;
 	getSmoothingPoolRegistrationState(nodeAddress: string): Promise<boolean>;
 }
 
-interface MinipoolManagerContract {
+export interface MinipoolManagerContract {
 	getMinipoolCountPerStatus(offset: number, limit: number): Promise<number[]>;
 	getNodeActiveMinipoolCount(nodeAddress: string): Promise<number>;
 	getNodeFinalisedMinipoolCount(nodeAddress: string): Promise<number>;
@@ -45,8 +46,8 @@ class CustomError extends Error {
 
 // Create a contract object
 async function createContract(
-	address: string,
-	abi: string,
+	address: Interface,
+	abi: Interface,
 	provider: provider,
 	loggingEnabled: boolean = false
 ) {
@@ -132,9 +133,10 @@ async function getNodeMiniPoolCount(
 	nodeAddress: string
 ) {
 	try {
-		const minipoolCount = await minipoolManagerContract.getNodeMinipoolCount(nodeAddress);
-
-		return Number(minipoolCount);
+		if (minipoolManagerContract != undefined) {
+			const minipoolCount = await minipoolManagerContract.getNodeMinipoolCount(nodeAddress);
+			return Number(minipoolCount);
+		}
 	} catch (error) {
 		console.error(error);
 	}
