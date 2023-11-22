@@ -13,10 +13,13 @@ import {
 	// getNodeDepositBalance
 } from '$lib/rocketPoolContractCalls';
 
-import rocketMinipoolManagerAbi from '$lib/abi/rocketpool/contracts/contract/minipool/RocketMinipoolManager.json';
-import genericMinipooContractAbi from '$lib/abi/GenericMinipoolContract.json';
+import rocketMinipoolManagerAbiJson from '$lib/abi/rocketpool/contracts/contract/minipool/RocketMinipoolManager.json';
+import genericMinipooContractAbiJson from '$lib/abi/GenericMinipoolContract.json';
 // Initialize a connection to the Ethereum network
 const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
+
+const genericMinipooContractAbi = new ethers.utils.Interface(genericMinipooContractAbiJson);
+const rocketMinipoolManagerAbi = new ethers.utils.Interface(rocketMinipoolManagerAbiJson);
 
 // Create the RocketMinipoolManager contract object
 const minipoolManager = await createContract(
