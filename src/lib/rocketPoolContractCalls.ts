@@ -8,11 +8,15 @@ interface RocketNodeManagerContract {
 interface MinipoolManagerContract {
 	getMinipoolCountPerStatus(offset: number, limit: number): Promise<number[]>;
 	getNodeActiveMinipoolCount(nodeAddress: string): Promise<number>;
+	getNodeFinalisedMinipoolCount(nodeAddress: string): Promise<number>;
 	getNodeMinipoolCount(nodeAddress: string): Promise<number>;
 	getNodeValidatingMinipoolCount(nodeAddress: string): Promise<number>;
 	getNodeMinipoolAt(nodeAddress: string, index: number): Promise<string>;
 }
 
+interface MinipoolDelegateContract {
+	getNodeDepositBalance(): Promise<number>;
+}
 interface provider {
 	provider: ethers.AbstractProvider;
 }
@@ -28,6 +32,15 @@ interface NodeDetails {
 	minipoolCount: bigint;
 	smoothingPoolRegistrationState: boolean;
 	ethMatched: bigint;
+}
+
+class CustomError extends Error {
+	shortMessage: string;
+
+	constructor(message?: string, shortMessage: string = '') {
+		super(message);
+		this.shortMessage = shortMessage;
+	}
 }
 
 // Create a contract object
@@ -58,16 +71,15 @@ async function createContract(
 async function getNodeDetails(
 	rocketNodeManagerContract: RocketNodeManagerContract,
 	nodeAddress: string
-): Promise<NodeDetails> {
+): Promise<NodeDetails | { address: string; message: string } | undefined> {
 	try {
 		const nodeDetails = await rocketNodeManagerContract.getNodeDetails(nodeAddress);
-
 		return nodeDetails;
 	} catch (error) {
 		console.log('*** ERROR MESSAGE FROM FUNCTION ***');
 		console.error(error);
 
-		if (error.shortMessage == 'bad address checksum') {
+		if (error instanceof CustomError && error.shortMessage == 'bad address checksum') {
 			console.error(error.shortMessage);
 			return {
 				address: nodeAddress,
