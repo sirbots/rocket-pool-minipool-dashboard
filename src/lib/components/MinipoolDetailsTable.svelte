@@ -14,15 +14,15 @@
 
 	interface Minipool {
 		address: string;
-		nodeDepositBalance: bigint;
-		minipoolCommissionRate: bigint;
-		balance: bigint;
-		nodeShare: bigint;
+		nodeDepositBalance: number;
+		minipoolCommissionRate: number;
+		balance: number;
+		nodeShare: number;
 	}
 
 	interface MinipoolBalance {
-		totalUnclaimed: bigint;
-		nodeUnclaimed: bigint;
+		totalUnclaimed: number;
+		nodeUnclaimed: number;
 	}
 
 	interface NodeApiData {
@@ -126,7 +126,7 @@
 						></td
 					>
 					<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
-					<td>{formatCoinValue(pool.minipoolCommissionRate * BigInt(100), 2)}%</td>
+					<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
 					<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
 					<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
 					<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>

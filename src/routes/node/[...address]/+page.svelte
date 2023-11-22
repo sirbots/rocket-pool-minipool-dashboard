@@ -20,14 +20,14 @@
 	$: rplPrice = 0;
 	$: nodeApiData = {
 		status: 'loading',
-		balanceETH: 0n,
-		balanceRPL: 0n,
-		rplStake: 0n,
-		effectiveRPLStake: 0n,
-		minimumRPLStake: 0n,
-		maximumRPLStke: 0n,
-		minipoolCount: 0n,
-		ethMatched: 0n,
+		balanceETH: 0,
+		balanceRPL: 0,
+		rplStake: 0,
+		effectiveRPLStake: 0,
+		minimumRPLStake: 0,
+		maximumRPLStke: 0,
+		minipoolCount: 0,
+		ethMatched: 0,
 		smoothingPoolRegistrationState: false
 	};
 	$: minipoolApiData = {
@@ -52,7 +52,7 @@
 		formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
 		formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
 		formatCoinValue(nodeApiData.rplStake, 6) * rplPrice;
-	$: minipoolDollarValue = minipoolDollarValue =
+	$: minipoolDollarValue =
 		(formatCoinValue(minipoolBalance.nodeStaked, 6) +
 			formatCoinValue(minipoolBalance.nodeUnclaimed, 6)) *
 		ethPrice;
