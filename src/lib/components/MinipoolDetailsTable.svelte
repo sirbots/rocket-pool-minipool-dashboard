@@ -3,15 +3,41 @@
 	import formatCoinValue from '$lib/formatCoinValue';
 	import Jumper from '$lib/components/spinners/Jumper.svelte';
 
-	export let nodeApiData: object;
-	export let minipoolApiData: object;
-	export let minipoolBalance: object;
+	interface MinipoolApiData {
+		status: string;
+		minipoolCount: number | string;
+		activeMinipoolCount: number;
+		validatingMinipoolCount: number;
+		finalisedMinipoolCount: number;
+		minipools: Minipool[];
+	}
+
+	interface Minipool {
+		address: string;
+		nodeDepositBalance: bigint;
+		minipoolCommissionRate: bigint;
+		balance: bigint;
+		nodeShare: bigint;
+	}
+
+	interface MinipoolBalance {
+		totalUnclaimed: bigint;
+		nodeUnclaimed: bigint;
+	}
+
+	interface NodeApiData {
+		minipoolCount: number;
+	}
+
+	export let nodeApiData: NodeApiData;
+	export let minipoolApiData: MinipoolApiData;
+	export let minipoolBalance: MinipoolBalance;
 	export let spinnerSize: number;
 	export let ethPrice: number;
 	export let minipoolDollarValue: number;
 
 	// Helpers
-	function truncateAddress(address) {
+	function truncateAddress(address: string) {
 		return address.slice(0, 6) + '...' + address.slice(-4);
 	}
 </script>
@@ -34,7 +60,7 @@
 <ul class="minipoolStatusList">
 	<li>
 		Total:
-		{#if minipoolApiData.minipoolCount == 'loading'}
+		{#if minipoolApiData.status == 'loading'}
 			<Jumper size={spinnerSize} />
 		{:else}
 			{minipoolApiData.minipoolCount}
@@ -42,7 +68,7 @@
 	</li>
 	<li>
 		Active:
-		{#if minipoolApiData.minipoolCount == 'loading'}
+		{#if minipoolApiData.status == 'loading'}
 			<Jumper size={spinnerSize} />
 		{:else}
 			{minipoolApiData.activeMinipoolCount}
@@ -50,7 +76,7 @@
 	</li>
 	<li>
 		Validating:
-		{#if minipoolApiData.minipoolCount == 'loading'}
+		{#if minipoolApiData.status == 'loading'}
 			<Jumper size={spinnerSize} />
 		{:else}
 			{minipoolApiData.validatingMinipoolCount}
@@ -58,7 +84,7 @@
 	</li>
 	<li>
 		Finalized:
-		{#if minipoolApiData.minipoolCount == 'loading'}
+		{#if minipoolApiData.status == 'loading'}
 			<Jumper size={spinnerSize} />
 		{:else}
 			{minipoolApiData.finalisedMinipoolCount}
@@ -67,7 +93,7 @@
 </ul>
 
 <!-- Display minipool data if the API call is complete -->
-{#if minipoolApiData.minipools !== 'loading'}
+{#if minipoolApiData.status !== 'loading'}
 	<table class="minipoolDetails">
 		<thead>
 			<tr>
@@ -100,7 +126,7 @@
 						></td
 					>
 					<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
-					<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
+					<td>{formatCoinValue(pool.minipoolCommissionRate * BigInt(100), 2)}%</td>
 					<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
 					<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
 					<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>

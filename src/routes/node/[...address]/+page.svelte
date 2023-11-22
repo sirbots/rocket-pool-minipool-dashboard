@@ -31,12 +31,13 @@
 		smoothingPoolRegistrationState: false
 	};
 	$: minipoolApiData = {
+		status: 'loading',
 		minipoolCount: 0,
 		activeMinipoolCount: 0,
 		finalisedMinipoolCount: 0,
 		validatingMinipoolCount: 0,
 		// TO DO: Build out the empty minipools object so we have the types
-		minipools: 'loading'
+		minipools: {}
 	};
 
 	$: minipoolBalance = {
