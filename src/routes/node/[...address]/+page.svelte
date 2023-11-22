@@ -1,4 +1,12 @@
+<script lang="ts" context="module">
+	declare const umami: Umami;
+</script>
+
 <script lang="ts">
+	// Types
+	import type { MinipoolApiData, Minipool, MinipoolBalance, NodeApiData, Umami } from '$lib/types';
+
+	// Components
 	import { onMount } from 'svelte';
 	import type { PageData } from './$types';
 	import MinipoolDetailsTable from '$lib/components/MinipoolDetailsTable.svelte';
@@ -7,6 +15,7 @@
 	import formatCoinValue from '$lib/formatCoinValue';
 
 	interface PageData {
+		message: string;
 		nodeAddress: string;
 		formattedRegistrationDate: string;
 		timezone: string;
@@ -16,8 +25,12 @@
 
 	const spinnerSize = 25;
 
+	let nodeApiData: NodeApiData;
+	let minipoolApiData: MinipoolApiData;
+
 	$: ethPrice = 0;
 	$: rplPrice = 0;
+
 	$: nodeApiData = {
 		status: 'loading',
 		balanceETH: 0,
@@ -25,11 +38,12 @@
 		rplStake: 0,
 		effectiveRPLStake: 0,
 		minimumRPLStake: 0,
-		maximumRPLStke: 0,
+		maximumRPLStake: 0,
 		minipoolCount: 0,
 		ethMatched: 0,
 		smoothingPoolRegistrationState: false
 	};
+
 	$: minipoolApiData = {
 		status: 'loading',
 		minipoolCount: 0,
@@ -37,7 +51,7 @@
 		finalisedMinipoolCount: 0,
 		validatingMinipoolCount: 0,
 		// TO DO: Build out the empty minipools object so we have the types
-		minipools: {}
+		minipools: []
 	};
 
 	$: minipoolBalance = {
@@ -76,7 +90,7 @@
 		).then((res) => res.json());
 
 		// Helpers functions to aggregate the minipool data
-		async function aggregateMinipoolData(minipools) {
+		async function aggregateMinipoolData(minipools: Minipool[]) {
 			for (const pool of minipools) {
 				// Update the minipoolBalance
 				minipoolBalance.totalUnclaimed += pool.balance;

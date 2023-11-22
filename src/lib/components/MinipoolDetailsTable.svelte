@@ -1,33 +1,10 @@
 <script lang="ts">
+	// Types
+	import type { MinipoolApiData, MinipoolBalance, NodeApiData } from '$lib/types';
+	// Components
 	import { onMount } from 'svelte';
 	import formatCoinValue from '$lib/formatCoinValue';
 	import Jumper from '$lib/components/spinners/Jumper.svelte';
-
-	interface MinipoolApiData {
-		status: string;
-		minipoolCount: number | string;
-		activeMinipoolCount: number;
-		validatingMinipoolCount: number;
-		finalisedMinipoolCount: number;
-		minipools: Minipool[];
-	}
-
-	interface Minipool {
-		address: string;
-		nodeDepositBalance: number;
-		minipoolCommissionRate: number;
-		balance: number;
-		nodeShare: number;
-	}
-
-	interface MinipoolBalance {
-		totalUnclaimed: number;
-		nodeUnclaimed: number;
-	}
-
-	interface NodeApiData {
-		minipoolCount: number;
-	}
 
 	export let nodeApiData: NodeApiData;
 	export let minipoolApiData: MinipoolApiData;
