@@ -4,7 +4,7 @@ export interface MinipoolApiData {
 	activeMinipoolCount: number;
 	validatingMinipoolCount: number;
 	finalisedMinipoolCount: number;
-	minipools: Minipool[];
+	minipoolAddresses: string[];
 }
 
 export interface Minipool {

@@ -13,10 +13,66 @@
 	export let ethPrice: number;
 	export let minipoolDollarValue: number;
 
+	let singleMinipoolDataArray: Minipool[] = [];
+
+	interface Minipool {
+		address: string;
+		balance: number;
+		nodeDepositBalance: number;
+		nodeRefundBalance: number;
+		minipoolCommissionRate: number;
+		nodeShare: number;
+		userShare: number;
+	}
+
+	// async function updateMinipoolData(singleMinipool: Minipool[]) {}
+
+	async function getAllMinipoolData() {
+		try {
+			for (const address of minipoolApiData.minipoolAddresses) {
+				console.log(`Fetching data for ${address}`);
+				const singleMinipoolData = await fetch(
+					`../../api/rocket-pool/minipool-manager/single-minipool-data?minipoolAddress=${address}`
+				).then((res) => res.json());
+
+				// await updateMinipoolData(minipoolData);
+
+				// Update the minipool data
+				singleMinipoolDataArray = [...singleMinipoolDataArray, singleMinipoolData];
+				console.log('new singleMinipoolDataArray:');
+				console.log(singleMinipoolDataArray);
+
+				// Update the aggregate data
+				minipoolBalance.totalUnclaimed += singleMinipoolData.balance;
+				minipoolBalance.nodeUnclaimed += singleMinipoolData.nodeShare;
+				minipoolBalance.userUnclaimed += singleMinipoolData.userShare;
+				minipoolBalance.refundBalance += singleMinipoolData.nodeRefundBalance;
+
+				// Calculate the total ETH owned by the node owner
+				minipoolBalance.nodeStaked += singleMinipoolData.nodeDepositBalance;
+			}
+		} catch (error) {
+			console.error(error);
+		}
+	}
+
+	$: {
+		if (minipoolApiData.status == 'loaded') {
+			console.log(`minipoolApiData.status == 'loaded'`);
+			console.log(`Attempting to fetch single minipool data...`);
+			getAllMinipoolData();
+		}
+	}
+
 	// Helpers
 	function truncateAddress(address: string) {
 		return address.slice(0, 6) + '...' + address.slice(-4);
 	}
+
+	onMount(async () => {
+		// Iterate through each minipool address and fetch the inidividual minipool data (we do it from the client instead of the API because pulling all of the data from the API causes the Netlify function to timeout)
+		// await aggregateMinipoolData(minipoolApiData.minipools);
+	});
 </script>
 
 <h2>Minipools</h2>
@@ -70,7 +126,7 @@
 </ul>
 
 <!-- Display minipool data if the API call is complete -->
-{#if minipoolApiData.status !== 'loading'}
+{#if minipoolApiData.status == 'loaded'}
 	<table class="minipoolDetails">
 		<thead>
 			<tr>
@@ -94,7 +150,7 @@
 				<td>{formatCoinValue(minipoolBalance.nodeUnclaimed, 4)}</td>
 				<td>${(formatCoinValue(minipoolBalance.nodeUnclaimed, 6) * ethPrice).toFixed(2)}</td>
 			</tr>
-			{#each minipoolApiData.minipools as pool}
+			{#each singleMinipoolDataArray as pool}
 				<tr>
 					<td
 						><a
@@ -111,8 +167,8 @@
 			{/each}
 		</tbody>
 	</table>
-{:else}
 	<!-- Display the table in loading state while waiting for the API call to complete -->
+{:else}
 	<table class="minipoolDetails">
 		<thead>
 			<tr>

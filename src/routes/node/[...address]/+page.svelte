@@ -50,8 +50,8 @@
 		activeMinipoolCount: 0,
 		finalisedMinipoolCount: 0,
 		validatingMinipoolCount: 0,
-		// TO DO: Build out the empty minipools object so we have the types
-		minipools: []
+		// minipools: []
+		minipoolAddresses: []
 	};
 
 	$: minipoolBalance = {
@@ -89,21 +89,7 @@
 			`../../api/rocket-pool/minipool-manager?nodeAddress=${data.nodeAddress}`
 		).then((res) => res.json());
 
-		// Helpers functions to aggregate the minipool data
-		async function aggregateMinipoolData(minipools: Minipool[]) {
-			for (const pool of minipools) {
-				// Update the minipoolBalance
-				minipoolBalance.totalUnclaimed += pool.balance;
-				minipoolBalance.nodeUnclaimed += pool.nodeShare;
-				minipoolBalance.userUnclaimed += pool.userShare;
-				minipoolBalance.refundBalance += pool.nodeRefundBalance;
-
-				// Calculate the total ETH owned by the node owner
-				minipoolBalance.nodeStaked += pool.nodeDepositBalance;
-			}
-		}
-
-		await aggregateMinipoolData(minipoolApiData.minipools);
+		minipoolApiData.status = 'loaded';
 
 		if (nodeApiData.rplStake < nodeApiData.minimumRPLStake) {
 			belowMinimumStake = true;
