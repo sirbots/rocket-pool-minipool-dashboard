@@ -20,6 +20,9 @@ export interface Minipool {
 export interface MinipoolBalance {
 	totalUnclaimed: number;
 	nodeUnclaimed: number;
+	userUnclaimed: number;
+	refundBalance: number;
+	nodeStaked: number;
 }
 
 export interface NodeApiData {

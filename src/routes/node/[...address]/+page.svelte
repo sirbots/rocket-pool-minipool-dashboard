@@ -4,7 +4,7 @@
 
 <script lang="ts">
 	// Types
-	import type { MinipoolApiData, Minipool, MinipoolBalance, NodeApiData, Umami } from '$lib/types';
+	import type { MinipoolApiData, Minipool, NodeApiData, Umami } from '$lib/types';
 
 	// Components
 	import { onMount } from 'svelte';
@@ -27,6 +27,17 @@
 
 	let nodeApiData: NodeApiData;
 	let minipoolApiData: MinipoolApiData;
+
+	let singleMinipoolDataArray: Minipool[] = [];
+	let allMinipoolsLoaded = false;
+
+	$: minipoolBalance = {
+		totalUnclaimed: 0,
+		nodeUnclaimed: 0,
+		userUnclaimed: 0,
+		refundBalance: 0,
+		nodeStaked: 0
+	};
 
 	$: ethPrice = 0;
 	$: rplPrice = 0;
@@ -54,25 +65,54 @@
 		minipoolAddresses: []
 	};
 
-	$: minipoolBalance = {
-		totalUnclaimed: 0,
-		nodeUnclaimed: 0,
-		userUnclaimed: 0,
-		refundBalance: 0,
-		nodeStaked: 0
-	};
-
 	$: nodeDollarValue =
 		formatCoinValue(nodeApiData.balanceETH, 6) * ethPrice +
 		formatCoinValue(nodeApiData.balanceRPL, 6) * rplPrice +
 		formatCoinValue(nodeApiData.rplStake, 6) * rplPrice;
+
 	$: minipoolDollarValue =
 		(formatCoinValue(minipoolBalance.nodeStaked, 6) +
 			formatCoinValue(minipoolBalance.nodeUnclaimed, 6)) *
 		ethPrice;
+
 	$: totalDollarValue = nodeDollarValue + minipoolDollarValue;
 
 	$: belowMinimumStake = false;
+
+	$: {
+		if (minipoolApiData.status == 'loaded') {
+			getAllMinipoolData();
+		}
+	}
+	// Helpers
+	function truncateAddress(address: string) {
+		return address.slice(0, 6) + '...' + address.slice(-4);
+	}
+
+	async function getAllMinipoolData() {
+		try {
+			for (const address of minipoolApiData.minipoolAddresses) {
+				const singleMinipoolData = await fetch(
+					`../../api/rocket-pool/minipool-manager/single-minipool-data?minipoolAddress=${address}`
+				).then((res) => res.json());
+
+				// Update the minipool data
+				singleMinipoolDataArray = [...singleMinipoolDataArray, singleMinipoolData];
+
+				// Update the aggregate data
+				minipoolBalance.totalUnclaimed += singleMinipoolData.balance;
+				minipoolBalance.nodeUnclaimed += singleMinipoolData.nodeShare;
+				minipoolBalance.userUnclaimed += singleMinipoolData.userShare;
+				minipoolBalance.refundBalance += singleMinipoolData.nodeRefundBalance;
+
+				// Calculate the total ETH owned by the node owner
+				minipoolBalance.nodeStaked += singleMinipoolData.nodeDepositBalance;
+			}
+			allMinipoolsLoaded = true;
+		} catch (error) {
+			console.error(error);
+		}
+	}
 
 	onMount(async () => {
 		// Get price data from the Coinmarketcap API
@@ -344,14 +384,124 @@
 		</p>
 	{/if}
 
-	<MinipoolDetailsTable
-		{nodeApiData}
-		{minipoolApiData}
-		{minipoolBalance}
-		{spinnerSize}
-		{ethPrice}
-		{minipoolDollarValue}
-	/>
+	<h2>Minipools</h2>
+	<p class="centered">
+		Node Operator Share:
+		{#if minipoolDollarValue == 0}
+			<Jumper size={spinnerSize} />
+		{:else}
+			<span class="highlight">
+				${minipoolDollarValue.toLocaleString('en-US', {
+					minimumFractionDigits: 2,
+					maximumFractionDigits: 2
+				})}
+			</span>
+		{/if}
+	</p>
+
+	<ul class="minipoolStatusList">
+		<li>
+			Total:
+			{#if minipoolApiData.status == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.minipoolCount}
+			{/if}
+		</li>
+		<li>
+			Active:
+			{#if minipoolApiData.status == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.activeMinipoolCount}
+			{/if}
+		</li>
+		<li>
+			Validating:
+			{#if minipoolApiData.status == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.validatingMinipoolCount}
+			{/if}
+		</li>
+		<li>
+			Finalized:
+			{#if minipoolApiData.status == 'loading'}
+				<Jumper size={spinnerSize} />
+			{:else}
+				{minipoolApiData.finalisedMinipoolCount}
+			{/if}
+		</li>
+	</ul>
+
+	<!-- Display minipool data if the API call is complete -->
+
+	<table class="minipoolDetails">
+		<thead>
+			<tr>
+				<th colspan="6">Minipool Unclaimed Earnings</th>
+			</tr>
+			<tr>
+				<td><b>Minipool</b></td>
+				<td><b>Pool Type</b></td>
+				<td><b>Commission</b></td>
+				<td><b>Balance (ETH)</b></td>
+				<td><b>Operator Share (ETH)</b></td>
+				<td><b>USD</b></td>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>Total</td>
+				<td>---</td>
+				<td>---</td>
+				<td>{formatCoinValue(minipoolBalance.totalUnclaimed, 4)} </td>
+				<td>{formatCoinValue(minipoolBalance.nodeUnclaimed, 4)}</td>
+				<td>${(formatCoinValue(minipoolBalance.nodeUnclaimed, 6) * ethPrice).toFixed(2)}</td>
+			</tr>
+			{#if allMinipoolsLoaded == false}
+				<tr>
+					<td>0x00.....0000</td>
+					<td><Jumper size={spinnerSize} /></td>
+					<td><Jumper size={spinnerSize} /></td>
+					<td><Jumper size={spinnerSize} /></td>
+					<td><Jumper size={spinnerSize} /></td>
+					<td><Jumper size={spinnerSize} /></td>
+				</tr>
+				{#each singleMinipoolDataArray as pool}
+					<tr>
+						<td
+							><a
+								href={`https://etherscan.io/address/${pool.address}`}
+								data-umami-event="click_minipool_address">{truncateAddress(pool.address)}</a
+							></td
+						>
+						<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
+						<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
+						<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
+						<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
+						<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>
+					</tr>
+				{/each}
+			{:else}
+				{#each singleMinipoolDataArray as pool}
+					<tr>
+						<td
+							><a
+								href={`https://etherscan.io/address/${pool.address}`}
+								data-umami-event="click_minipool_address">{truncateAddress(pool.address)}</a
+							></td
+						>
+						<td>{formatCoinValue(pool.nodeDepositBalance, 0)}-ETH</td>
+						<td>{formatCoinValue(pool.minipoolCommissionRate * 100, 2)}%</td>
+						<td>{formatCoinValue(pool.balance, 4).toFixed(4)}</td>
+						<td>{formatCoinValue(pool.nodeShare, 4).toFixed(4)}</td>
+						<td>${(formatCoinValue(pool.nodeShare, 6) * ethPrice).toFixed(2)}</td>
+					</tr>
+				{/each}
+			{/if}
+		</tbody>
+	</table>
 {:else}
 	<h1>Invalid node address</h1>
 
@@ -375,6 +525,14 @@
 	}
 	h2 {
 		margin: 80px 0 25px;
+	}
+
+	ul.minipoolStatusList {
+		display: flex;
+		justify-content: space-between;
+		list-style: none;
+		padding: 0 10%;
+		margin: 20px 0 40px;
 	}
 
 	.belowMinimum {
