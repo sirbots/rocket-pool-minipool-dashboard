@@ -15,6 +15,7 @@ import {
 
 import rocketMinipoolManagerAbiJson from '$lib/abi/rocketpool/contracts/contract/minipool/RocketMinipoolManager.json';
 import genericMinipooContractAbiJson from '$lib/abi/GenericMinipoolContract.json';
+
 // Initialize a connection to the Ethereum network
 const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
 
@@ -29,34 +30,25 @@ const minipoolManagerContract = await createContract(
 	false
 );
 
-export async function GET({ url, setHeaders }) {
+interface Minipool {
+	address: string;
+	balance: number;
+	nodeDepositBalance: number;
+	nodeRefundBalance: number;
+	minipoolCommissionRate: number;
+	nodeShare: number;
+	userShare: number;
+}
+
+const minipools: Minipool[] = [];
+
+// Delay function to retry when there's trouble getting data from a minipool
+function delay(ms: number): Promise<void> {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function getIndividualMinipoolData(minipoolAddresses: string[]) {
 	try {
-		const nodeAddress = url.searchParams.get('nodeAddress');
-
-		// Get minipool data for a single node
-		const minipoolCount = await getNodeMiniPoolCount(minipoolManagerContract, nodeAddress);
-		const activeMinipoolCount = await getNodeActiveMiniPoolCount(
-			minipoolManagerContract,
-			nodeAddress
-		);
-		const finalisedMinipoolCount = await getNodeFinalisedMinipoolCount(
-			minipoolManagerContract,
-			nodeAddress
-		);
-		const validatingMinipoolCount = await getNodeValidatingMinipoolCount(
-			minipoolManagerContract,
-			nodeAddress
-		);
-
-		// Collect the individual minipool data
-		const minipoolAddresses = await getMinipoolAddresses(
-			minipoolManagerContract,
-			nodeAddress,
-			minipoolCount
-		);
-
-		const minipools = [];
-
 		// Iterate through the minipool addresses and get the minipool details
 		for (const minipoolAddress of minipoolAddresses) {
 			console.log(`Gathering minipool data for ${minipoolAddress}`);
@@ -74,17 +66,14 @@ export async function GET({ url, setHeaders }) {
 			let delegateAbi;
 
 			// Use the etherscan API to get the ABI for the delegate contract
-			try {
-				const response = await fetch(
-					`https://api.etherscan.io/api?module=contract&action=getabi&address=${delegateAddress}&apikey=${env.ETHERSCAN_API_KEY}`
-				);
-				const delegateAbiResponse = await response.json();
 
-				if (delegateAbiResponse.status === '1') {
-					delegateAbi = JSON.parse(delegateAbiResponse.result);
-				}
-			} catch (error) {
-				console.error(error);
+			const response = await fetch(
+				`https://api.etherscan.io/api?module=contract&action=getabi&address=${delegateAddress}&apikey=${env.ETHERSCAN_API_KEY}`
+			);
+			const delegateAbiResponse = await response.json();
+
+			if (delegateAbiResponse.status === '1') {
+				delegateAbi = JSON.parse(delegateAbiResponse.result);
 			}
 
 			// Create a new minipool contract, now with the delegate contract's ABI. This will allow us to get the minipool's balance and other data (see note above).
@@ -116,6 +105,67 @@ export async function GET({ url, setHeaders }) {
 				userShare: Number(userShare)
 				// userDepositBalance: Number(userDepositBalance),
 			});
+		}
+	} catch (error) {
+		console.error(error);
+		console.log('Retrying...');
+		await delay(1000); // Wait 1 second before trying again
+		return getMinipoolData(minipoolAddresses); // Retry the operation
+	}
+}
+
+// Get minipool data for a single node
+let minipoolCount: number | undefined;
+let activeMinipoolCount: number | undefined;
+let finalisedMinipoolCount: number | undefined;
+let validatingMinipoolCount: number | undefined;
+
+// Collect the individual minipool data
+let minipoolAddresses: string[] | undefined;
+
+async function getMinipoolData(nodeAddress: string) {
+	try {
+		// Get minipool data for a single node
+		minipoolCount = await getNodeMiniPoolCount(minipoolManagerContract, nodeAddress);
+		activeMinipoolCount = await getNodeActiveMiniPoolCount(minipoolManagerContract, nodeAddress);
+		finalisedMinipoolCount = await getNodeFinalisedMinipoolCount(
+			minipoolManagerContract,
+			nodeAddress
+		);
+		validatingMinipoolCount = await getNodeValidatingMinipoolCount(
+			minipoolManagerContract,
+			nodeAddress
+		);
+
+		// Collect the individual minipool data
+		minipoolAddresses = await getMinipoolAddresses(
+			minipoolManagerContract,
+			nodeAddress,
+			minipoolCount
+		);
+	} catch (error) {
+		console.error(error);
+		console.log('Retrying...');
+		await delay(1000); // Wait 1 second before trying again
+		return getMinipoolData(); // Retry the operation
+	}
+}
+
+export async function GET({ url, setHeaders }) {
+	const nodeAddress = url.searchParams.get('nodeAddress');
+
+	try {
+		if (nodeAddress != null) {
+			// Get the minipool metadata (but not individual pool data)
+			await getMinipoolData(nodeAddress);
+		}
+
+		if (minipoolAddresses === undefined) {
+			await delay(1000);
+			console.log('minipoolAddresses is undefinied. Killing the operation.');
+		} else {
+			// Get the individual minipool data
+			await getIndividualMinipoolData(minipoolAddresses);
 		}
 
 		setHeaders({
