@@ -1,48 +1,32 @@
 <script lang="ts">
-	// Create a variable to store the input address from the form
-	$: inputAddress = '';
+	// This isn't active yet.
 
-	// Validate the input to ensure that it's a valid Ethereum EOA address
-	const ethereumEOARegex = /^(0x)?[0-9a-fA-F]{40}$/;
-	$: addressValid = ethereumEOARegex.test(inputAddress.trim());
-
-	// Should we show the error message? Only if the address is not valid.
-	$: showInvalidAddressError = false;
+	$: inputEmail = '';
+	$: inputMessage = 'Enter your message here...';
 
 	function handleInput(event: Event) {
-		inputAddress = (event.target as HTMLInputElement).value;
-	}
-
-	function handleBlur() {
-		// If the address is invalid, display an error message, but only once they leave the focus of the input field (on:blur).
-		showInvalidAddressError = true;
+		inputEmail = (event.target as HTMLInputElement).value;
+		inputMessage = (event.target as HTMLTextAreaElement).value;
 	}
 </script>
 
-<div class="formWrapper">
-	<form method="POST" action="?/setAddress">
-		<input
-			type="text"
-			name="nodeAddress"
-			value={inputAddress}
-			placeholder="Enter your node address here..."
-			on:input={handleInput}
-			on:blur={handleBlur}
-		/>
+<form method="POST" action="?/setAddress">
+	<input type="email" name="email" value={inputEmail} on:input={handleInput} />
+	<textarea name="message" value={inputMessage} on:input={handleInput} />
 
-		<button type="submit" disabled={!addressValid}>View Node</button>
-	</form>
-</div>
-<div class="errorBox">
+	<button type="submit" disabled={false}>Send Message</button>
+</form>
+
+<!-- <div class="errorBox">
 	{#if !addressValid && showInvalidAddressError}
 		<p>That doesn't look like a valid Ethereum address. Are you sure you entered it correctly?</p>
 	{/if}
-</div>
+</div> -->
 
 <style>
-	.formWrapper {
+	form {
 		display: flex;
-		flex-direction: row;
+		flex-direction: column;
 
 		justify-content: center;
 		align-items: center;

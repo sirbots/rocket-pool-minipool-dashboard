@@ -3,9 +3,9 @@
 
 <header>
 	<a class="logo" href="/" data-umami-event="click_header_logo">Rocket Dash</a>
-	<div class="nav-links">
-		<a href="/feedback" data-umami-event="click_header_feedback">Feedback</a>
-	</div>
+	<!-- <div class="nav-links">
+		<a href="/email" data-umami-event="click_header_email">Email Updates</a>
+	</div> -->
 </header>
 
 <div class="container">
@@ -35,7 +35,7 @@
 		--light-orange: #da702c;
 		--dark-orange: #bc5215;
 		--red: #d14d41;
-		--blue: #4385be;
+		--blue: #2e96f1;
 
 		--standard-radius: 15px;
 	}
@@ -96,7 +96,7 @@
 	}
 
 	.logo {
-		font-size: 1.6rem;
+		font-size: 1.4rem;
 		padding: 12px 25px !important;
 		border-radius: var(--standard-radius);
 		border: 3px double var(--black);

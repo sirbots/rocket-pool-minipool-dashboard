@@ -2,7 +2,7 @@
 </script>
 
 <svelte:head>
-	<title>404 Error | rocketdash.xyz</title>
+	<title>404 Error | RocketDash</title>
 </svelte:head>
 
 <h1>oh no! error!</h1>
