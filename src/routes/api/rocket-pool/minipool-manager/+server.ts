@@ -34,7 +34,7 @@ export async function GET({ url, setHeaders }) {
 	const nodeAddress = url.searchParams.get('nodeAddress');
 
 	setHeaders({
-		'cache-control': 'max-age=600'
+		'cache-control': 'max-age=1200'
 	});
 
 	try {

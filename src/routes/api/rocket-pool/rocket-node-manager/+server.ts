@@ -33,7 +33,7 @@ export async function GET({ url, setHeaders }) {
 		);
 
 		setHeaders({
-			'cache-control': 'max-age=600'
+			'cache-control': 'max-age=800'
 		});
 
 		return json({

@@ -1,34 +1,13 @@
 import { json } from '@sveltejs/kit';
 import { ethers } from 'ethers';
 import { env } from '$env/dynamic/private';
-import { rocketMinipoolManagerAddress } from '$lib/smartContractAddresses';
 
-import {
-	createContract,
-	getNodeMiniPoolCount,
-	getNodeActiveMiniPoolCount,
-	getNodeFinalisedMinipoolCount,
-	getNodeValidatingMinipoolCount,
-	getMinipoolAddresses
-	// getNodeDepositBalance
-} from '$lib/rocketPoolContractCalls';
-
-import rocketMinipoolManagerAbiJson from '$lib/abi/rocketpool/contracts/contract/minipool/RocketMinipoolManager.json';
 import genericMinipooContractAbiJson from '$lib/abi/GenericMinipoolContract.json';
 
 // Initialize a connection to the Ethereum network
 const provider = ethers.getDefaultProvider('mainnet', { etherscan: env.ETHERSCAN_API_KEY });
 
 const genericMinipooContractAbi = new ethers.Interface(genericMinipooContractAbiJson);
-const rocketMinipoolManagerAbi = new ethers.Interface(rocketMinipoolManagerAbiJson);
-
-// Create the RocketMinipoolManager contract object
-const minipoolManagerContract = await createContract(
-	rocketMinipoolManagerAddress,
-	rocketMinipoolManagerAbi,
-	provider,
-	false
-);
 
 export async function GET({ url, setHeaders }) {
 	const minipoolAddress = url.searchParams.get('minipoolAddress');
@@ -91,9 +70,9 @@ export async function GET({ url, setHeaders }) {
 			});
 		}
 
-		// setHeaders({
-		// 	'cache-control': 'max-age=600'
-		// });
+		setHeaders({
+			'cache-control': 'max-age=2400'
+		});
 	} catch (error) {
 		console.error(error);
 	}

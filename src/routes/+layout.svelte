@@ -3,6 +3,7 @@
 
 <header>
 	<div class="logo"><a href="/" data-umami-event="click_header_logo">Rocket Dash</a></div>
+	<a href="/feedback">Feedback</a>
 </header>
 
 <div class="container">
