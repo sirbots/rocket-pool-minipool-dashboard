@@ -2,8 +2,10 @@
 </script>
 
 <header>
-	<div class="logo"><a href="/" data-umami-event="click_header_logo">Rocket Dash</a></div>
-	<a href="/feedback">Feedback</a>
+	<a class="logo" href="/" data-umami-event="click_header_logo">Rocket Dash</a>
+	<div class="nav-links">
+		<a href="/feedback" data-umami-event="click_header_feedback">Feedback</a>
+	</div>
 </header>
 
 <div class="container">
@@ -28,7 +30,6 @@
 <style>
 	/* Set global styles */
 	:root {
-		--white: #fffcf0;
 		--cream: #e6e4d9;
 		--black: #100f0f;
 		--light-orange: #da702c;
@@ -49,7 +50,7 @@
 	}
 
 	:global(body) {
-		background-color: var(--white);
+		background-color: var(--cream);
 		font-size: 16px;
 		font-family: 'Noto Sans Mono', monospace;
 	}
@@ -87,24 +88,41 @@
 	/* Header */
 	header {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		flex-wrap: row;
-		justify-content: center;
+		justify-content: space-around;
 		align-items: center;
 		padding: 100px 25px 25px 25px;
 	}
+
 	.logo {
-		padding: 14px 45px;
+		font-size: 1.6rem;
+		padding: 12px 25px !important;
 		border-radius: var(--standard-radius);
-		border: 3px double #101010;
+		border: 3px double var(--black);
 		max-width: 200px;
-		margin-bottom: 20px;
 	}
 
-	.logo a {
-		color: #000;
-		font-size: 1.8rem;
+	.nav-links a {
+		padding: 10px 10px;
+		border-radius: var(--standard-radius);
+		border: 1px solid var(--black);
+	}
+
+	header a {
+		color: var(--black);
+		font-weight: bold;
 		text-decoration: none;
+	}
+	header a:hover {
+		background-color: var(--black);
+		color: var(--cream);
+		font-weight: bold;
+		text-decoration: none;
+	}
+
+	.nav-links a {
+		font-size: 1.1rem;
 	}
 
 	/* Page */
@@ -130,8 +148,6 @@
 		display: flex;
 		flex-wrap: row;
 		justify-content: center;
-
-		color: var(--white);
 		margin-top: 100px;
 		padding-bottom: 100px;
 	}

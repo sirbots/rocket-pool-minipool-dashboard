@@ -560,7 +560,7 @@
 
 	:global(thead th) {
 		font-size: 1.5rem;
-		color: var(--white);
+		color: var(--cream);
 	}
 	:global(thead tr th) {
 		background-color: var(--dark-orange);
