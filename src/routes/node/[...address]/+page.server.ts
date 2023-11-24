@@ -22,30 +22,36 @@ export const load: PageServerLoad = async ({ params }) => {
 			false
 		);
 
-		const nodeDetails = await getNodeDetails(rocketNodeManagerContract, params.address);
+		let nodeDetails;
 
-		// Handle invalid node address
-		if (nodeDetails.message == 'invalid-node-address') {
-			return {
-				nodeAddress: params.address,
-				message: nodeDetails.message
-			};
+		if (rocketNodeManagerContract != undefined) {
+			nodeDetails = await getNodeDetails(rocketNodeManagerContract, params.address);
 		}
 
-		const registrationTime = nodeDetails.registrationTime;
+		// Handle invalid node address
+		if (nodeDetails) {
+			if (nodeDetails.message == 'invalid-node-address') {
+				return {
+					nodeAddress: params.address,
+					message: nodeDetails.message
+				};
+			} else {
+				const registrationTime = nodeDetails.registrationTime;
+				const registrationDate = new Date(Number(registrationTime) * 1000);
+				const formattedRegistrationDate = new Intl.DateTimeFormat('en-US', {
+					year: 'numeric',
+					month: 'long',
+					day: 'numeric'
+				}).format(registrationDate);
 
-		const registrationDate = new Date(Number(registrationTime) * 1000);
-		const formattedRegistrationDate = new Intl.DateTimeFormat('en-US', {
-			year: 'numeric',
-			month: 'long',
-			day: 'numeric'
-		}).format(registrationDate);
-
-		return {
-			nodeAddress: params.address,
-			timezone: nodeDetails.timezoneLocation,
-			formattedRegistrationDate: formattedRegistrationDate
-		};
+				// Return the data for Svelte to render
+				return {
+					nodeAddress: params.address,
+					timezone: nodeDetails.timezoneLocation,
+					formattedRegistrationDate: formattedRegistrationDate
+				};
+			}
+		}
 	} catch (error) {
 		console.log('*** ERROR MESSAGE ***');
 		console.error(error);

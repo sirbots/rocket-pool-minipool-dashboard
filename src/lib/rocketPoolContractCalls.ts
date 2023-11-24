@@ -23,16 +23,20 @@ interface provider {
 }
 
 interface NodeDetails {
+	address: string;
+	// These are optional, depending on whether the node address is valid. If an invalid node message is returned, message will be returened but the rest will not:
 	message?: string;
-	balanceETH: bigint;
-	balanceRPL: bigint;
-	rplStake: bigint;
-	effectiveRPLStake: bigint;
-	minimumRPLStake: bigint;
-	maximumRPLStake: bigint;
-	minipoolCount: bigint;
-	smoothingPoolRegistrationState: boolean;
-	ethMatched: bigint;
+	balanceETH?: bigint;
+	balanceRPL?: bigint;
+	rplStake?: bigint;
+	effectiveRPLStake?: bigint;
+	minimumRPLStake?: bigint;
+	maximumRPLStake?: bigint;
+	minipoolCount?: bigint;
+	smoothingPoolRegistrationState?: boolean;
+	ethMatched?: bigint;
+	timezoneLocation?: string;
+	registrationTime?: string;
 }
 
 class CustomError extends Error {
@@ -46,7 +50,7 @@ class CustomError extends Error {
 
 // Create a contract object
 async function createContract(
-	address: Interface,
+	address: string,
 	abi: Interface,
 	provider: provider,
 	loggingEnabled: boolean = false
@@ -72,7 +76,7 @@ async function createContract(
 async function getNodeDetails(
 	rocketNodeManagerContract: RocketNodeManagerContract,
 	nodeAddress: string
-): Promise<NodeDetails | { address: string; message: string } | undefined> {
+): Promise<NodeDetails | undefined> {
 	try {
 		const nodeDetails = await rocketNodeManagerContract.getNodeDetails(nodeAddress);
 		return nodeDetails;
